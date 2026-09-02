@@ -232,33 +232,40 @@ Return ONLY valid JSON:
 - crop_confidence: your confidence (0.0-1.0) that this is the correct plant species
 - disease_confidence: your confidence (0.0-1.0) in the disease diagnosis"""
 
+            # Explicitly disable AFC to remove the SDK warning and enforce strict JSON output
+            config = types.GenerateContentConfig(
+                response_mime_type="application/json",
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            )
+
             response = client.models.generate_content(
                 model="gemini-3.6-flash",
                 contents=[
                     types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
-                    prompt
-                ]
+                    prompt,
+                ],
+                config=config,
             )
 
             content = response.text.strip()
             if content.startswith("```"):
                 content = content.split("\n", 1)[-1].rsplit("\n", 1)[0]
             diagnosis = json.loads(content)
-            
+
             # Enrich with new fields if missing
             diagnosis.setdefault("crop_confidence", diagnosis.get("confidence", 0.85))
             diagnosis.setdefault("disease_confidence", diagnosis.get("confidence", 0.80))
             diagnosis.setdefault("confidence", diagnosis.get("disease_confidence", 0.80))
-            
+
             # Compute crop match
             status, message = _compute_crop_match(
                 diagnosis.get("crop_detected"),
                 crop_name,
-                diagnosis.get("crop_confidence", 0.85)
+                diagnosis.get("crop_confidence", 0.85),
             )
             diagnosis["crop_match_status"] = status
             diagnosis["crop_match_message"] = message
-            
+
             print(f"✅ Gemini API succeeded with Key #{idx + 1}!")
             return diagnosis
 
@@ -270,7 +277,6 @@ Return ONLY valid JSON:
 
     print("❌ All Gemini API keys failed; falling back...")
     return None
-
 # ============ 3. HUGGING FACE API ============
 import os
 
