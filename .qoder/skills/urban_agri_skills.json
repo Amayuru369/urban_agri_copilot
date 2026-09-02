@@ -1,0 +1,120 @@
+{
+  "name": "urban_agri_skills",
+  "version": "0.1.0",
+  "description": "Interactive agent skills for UrbanAgri-Copilot: garden planning, plant diagnosis, organic remedy synthesis, and grocery-savings estimation.",
+  "tools": [
+    {
+      "name": "skill_plan_garden",
+      "description": "Generate a ranked crop plan for a location, container type, and available growing space using Open-Meteo weather forecasts and per-crop agronomic rules.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "Latitude of the garden location."
+          },
+          "lon": {
+            "type": "number",
+            "description": "Longitude of the garden location."
+          },
+          "container_type": {
+            "type": "string",
+            "enum": ["pot", "grow_bag", "ground"],
+            "description": "Container type used for cultivation."
+          },
+          "space_sqm": {
+            "type": "number",
+            "description": "Available growing area in square metres.",
+            "minimum": 0.1
+          },
+          "target_month": {
+            "type": "integer",
+            "description": "Target calendar month (1-12) for the plan.",
+            "minimum": 1,
+            "maximum": 12
+          }
+        },
+        "required": ["lat", "lon", "container_type", "space_sqm", "target_month"]
+      },
+      "handler": {
+        "type": "service",
+        "module": "backend.app.services.planner_service",
+        "function": "generate_crop_plan"
+      }
+    },
+    {
+      "name": "skill_diagnose_plant",
+      "description": "Diagnose a plant health issue from an image. Uses a built-in mock expert unless a real vision endpoint is configured.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "image_path": {
+            "type": "string",
+            "description": "Filesystem path to the plant image to analyse."
+          },
+          "crop_name": {
+            "type": "string",
+            "description": "Optional crop name to guide the diagnosis."
+          }
+        },
+        "required": ["image_path"]
+      },
+      "handler": {
+        "type": "service",
+        "module": "backend.app.services.diagnose_service",
+        "function": "diagnose_plant_image",
+        "input_transform": {
+          "image_path": "read_image_bytes"
+        }
+      }
+    },
+    {
+      "name": "skill_synthesize_remedy",
+      "description": "Generate a zero-chemical organic remedy recipe from kitchen scraps for a given plant issue.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "issue_type": {
+            "type": "string",
+            "description": "Plant issue or deficiency to treat, e.g. 'Nitrogen Deficiency'."
+          },
+          "available_scraps": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Optional list of kitchen scraps available at home."
+          }
+        },
+        "required": ["issue_type"]
+      },
+      "handler": {
+        "type": "service",
+        "module": "backend.app.services.remedy_service",
+        "function": "synthesize_organic_remedy"
+      }
+    },
+    {
+      "name": "skill_calculate_savings",
+      "description": "Estimate household grocery savings for growing a crop based on current retail market prices.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "crop_name": {
+            "type": "string",
+            "description": "Name of the crop to evaluate."
+          },
+          "expected_yield_kg": {
+            "type": "number",
+            "description": "Expected harvest yield in kilograms.",
+            "minimum": 0
+          }
+        },
+        "required": ["crop_name", "expected_yield_kg"]
+      },
+      "handler": {
+        "type": "service",
+        "module": "backend.app.services.savings_service",
+        "function": "calculate_household_savings"
+      }
+    }
+  ]
+}

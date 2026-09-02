@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UrbanAgri-Copilot Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    .tab-btn.active {
+      border-bottom: 3px solid #15803d;
+      color: #15803d;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+  <header class="bg-green-900 text-white shadow">
+    <div class="max-w-6xl mx-auto px-4 py-5">
+      <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">UrbanAgri-Copilot</h1>
+      <p class="text-green-100 text-sm mt-1">Smart planning, diagnosis, and harvest economics for Sri Lankan urban growers</p>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <nav class="bg-white rounded-lg shadow mb-6 flex overflow-x-auto">
+      <button data-tab="planner" class="tab-btn active flex-1 px-4 py-3 text-sm md:text-base text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+        Agro-Climatic Balcony Planner
+      </button>
+      <button data-tab="doctor" class="tab-btn flex-1 px-4 py-3 text-sm md:text-base text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+        AI Leaf Doctor &amp; Kitchen Remedy
+      </button>
+      <button data-tab="economics" class="tab-btn flex-1 px-4 py-3 text-sm md:text-base text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+        Harvest Economics &amp; PDF Export
+      </button>
+    </nav>
+
+    <!-- Planner Tab -->
+    <section id="planner" class="tab-content space-y-6">
+      <div class="bg-white rounded-lg shadow p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-green-900 mb-4">Plan your balcony or terrace garden</h2>
+        <form id="planner-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+            <input id="lat" type="number" step="any" required value="6.9271" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+            <input id="lon" type="number" step="any" required value="79.8612" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">District / Location</label>
+            <div class="flex flex-wrap gap-2">
+              <select id="districtSelect" class="flex-1 min-w-[12rem] rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
+                <option value="">Select district...</option>
+                <option value="6.9271,79.8612">Colombo</option>
+                <option value="7.0917,79.9997">Gampaha</option>
+                <option value="6.5854,79.9607">Kalutara</option>
+                <option value="7.2906,80.6337">Kandy</option>
+                <option value="7.4675,80.6234">Matale</option>
+                <option value="6.9497,80.7891">Nuwara Eliya</option>
+                <option value="6.0535,80.2210">Galle</option>
+                <option value="5.9549,80.5550">Matara</option>
+                <option value="6.1248,81.1185">Hambantota</option>
+                <option value="9.6615,80.0255">Jaffna</option>
+                <option value="9.3803,80.3770">Kilinochchi</option>
+                <option value="8.9810,79.9044">Mannar</option>
+                <option value="8.7542,80.4982">Vavuniya</option>
+                <option value="9.2671,80.8145">Mullaitivu</option>
+                <option value="7.7310,81.6747">Batticaloa</option>
+                <option value="7.2912,81.6724">Ampara</option>
+                <option value="8.5874,81.2152">Trincomalee</option>
+                <option value="7.4863,80.3623">Kurunegala</option>
+                <option value="8.0362,79.8283">Puttalam</option>
+                <option value="8.3114,80.4037">Anuradhapura</option>
+                <option value="7.9403,81.0188">Polonnaruwa</option>
+                <option value="6.9934,81.0550">Badulla</option>
+                <option value="6.8728,81.3507">Monaragala</option>
+                <option value="6.7056,80.3847">Ratnapura</option>
+                <option value="7.2513,80.3464">Kegalle</option>
+              </select>
+              <button type="button" id="currentLocationBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-3 rounded-md transition">📍 Current</button>
+              <button type="button" id="pickOnMapBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-3 rounded-md transition">🗺️ Pick on Map</button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Container type</label>
+            <select id="container_type" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
+              <option value="Pot">Pot</option>
+              <option value="Raised Bed">Raised Bed</option>
+              <option value="Vertical Tower">Vertical Tower</option>
+              <option value="Grow Bag">Grow Bag</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Space</label>
+            <div class="flex items-center gap-2 mb-2">
+              <button type="button" id="space-mode-area" class="text-xs px-2 py-1 rounded-md bg-green-700 text-white font-medium transition">Total Area</button>
+              <button type="button" id="space-mode-dims" class="text-xs px-2 py-1 rounded-md bg-gray-200 text-gray-700 font-medium transition">Dimensions</button>
+            </div>
+            <!-- Area mode -->
+            <div id="space-area-input">
+              <div class="flex items-center gap-2">
+                <input id="space_sqm" type="number" step="0.1" min="0.1" max="50" required value="2" placeholder="e.g. 5.0" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2" />
+                <span class="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-md whitespace-nowrap">m²</span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Enter floor area in square meters (m²).</p>
+            </div>
+            <!-- Dimensions mode -->
+            <div id="space-dims-input" class="hidden">
+              <div class="flex gap-2">
+                <input id="space-length" type="number" step="0.1" min="0.1" max="200" placeholder="Length" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2 text-sm" />
+                <input id="space-width" type="number" step="0.1" min="0.1" max="200" placeholder="Width" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2 text-sm" />
+                <select id="space-unit" class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-2 py-2 text-sm">
+                  <option value="m">m</option>
+                  <option value="cm">cm</option>
+                  <option value="ft">ft</option>
+                </select>
+              </div>
+              <p id="space-dims-result" class="text-xs text-gray-500 mt-1"></p>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Target month</label>
+            <select id="target_month" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8" selected>August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          <div class="md:col-span-2 lg:col-span-2 flex items-end">
+            <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition">Generate Crop Plan</button>
+          </div>
+        </form>
+        <div id="mapContainer" class="hidden my-3 border border-gray-300 rounded-lg overflow-hidden h-72"></div>
+      </div>
+
+      <div id="planner-result" class="hidden bg-white rounded-lg shadow p-5 md:p-6">
+        <h3 class="text-md font-semibold text-gray-800 mb-3">Recommended plan</h3>
+        <div id="planner-summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 text-sm"></div>
+        
+        <!-- Weather Forecast Panel -->
+        <div id="weather-panel" class="hidden mb-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <h4 id="weather-panel-heading" class="text-sm font-semibold text-gray-700">Weather Outlook</h4>
+            <div class="flex items-center gap-2">
+              <button type="button" id="weather-view-7day" class="text-xs px-3 py-1 rounded-md bg-green-700 text-white font-medium transition">7-Day Daily</button>
+              <button type="button" id="weather-view-4week" class="text-xs px-3 py-1 rounded-md bg-gray-200 text-gray-700 font-medium transition">Crop Growth Timeline</button>
+            </div>
+          </div>
+          <!-- Focus Crop Selector (for timeline) -->
+          <div id="focus-crop-bar" class="hidden mb-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <div class="flex flex-wrap items-center gap-3">
+              <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Focus Crop:</label>
+              <select id="focus-crop-select" class="flex-1 min-w-[10rem] text-sm rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-2 py-1.5">
+                <option value="">— select a crop —</option>
+              </select>
+              <span id="focus-crop-loading" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-green-700"></span>
+            </div>
+            <!-- Custom plant inputs (shown when "Other" selected) -->
+            <div id="custom-crop-inputs" class="hidden mt-2 flex flex-wrap items-center gap-2">
+              <input id="custom-crop-name" type="text" placeholder="Custom plant name" class="flex-1 min-w-[8rem] text-sm rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-2 py-1.5" />
+              <input id="custom-crop-days" type="number" min="7" max="365" placeholder="Est. days to harvest" class="w-36 text-sm rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-2 py-1.5" />
+              <button type="button" id="custom-crop-go" class="text-xs bg-green-700 hover:bg-green-800 text-white font-medium px-3 py-1.5 rounded-md transition">Show Timeline</button>
+            </div>
+          </div>
+          <!-- 7-Day Daily Outlook -->
+          <div id="weather-7day-view">
+            <div id="weather-weekly-strip" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2"></div>
+          </div>
+          <!-- Dynamic Crop Growth Timeline -->
+          <div id="weather-4week-view" class="hidden">
+            <div class="flex items-center justify-end mb-2">
+              <button type="button" id="climate-detail-toggle" class="text-xs px-3 py-1 rounded-md bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition" title="Toggle detailed temperature, humidity, and daylight metrics">
+                ⚙️ Show Climate Details
+              </button>
+            </div>
+            <div id="weather-cycle-strip" class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory"></div>
+          </div>
+        </div>
+        
+        <!-- Ranked Recommendations Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border">
+            <thead class="bg-green-50">
+              <tr>
+                <th class="text-left px-3 py-2 font-semibold w-16">Rank</th>
+                <th class="text-left px-3 py-2 font-semibold">Crop</th>
+                <th class="text-left px-3 py-2 font-semibold">Score</th>
+                <th class="text-left px-3 py-2 font-semibold">Layout</th>
+                <th class="text-left px-3 py-2 font-semibold">Notes</th>
+              </tr>
+            </thead>
+            <tbody id="planner-table-body" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Leaf Doctor Tab -->
+    <section id="doctor" class="tab-content hidden space-y-6">
+      <div class="bg-white rounded-lg shadow p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-green-900 mb-4">AI Leaf Doctor &amp; Kitchen Remedy Studio</h2>
+        <form id="doctor-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Plant photo</label>
+            <input id="leaf-image" type="file" accept="image/*" required class="w-full text-sm" />
+            <div id="image-preview-container" class="hidden mt-2">
+              <img id="image-preview" class="max-h-32 rounded border border-gray-200" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Known crop (optional)</label>
+            <select id="doctor-crop" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
+              <option value="">Auto-detect</option>
+            </select>
+          </div>
+          <div class="flex items-center md:col-span-2">
+            <input id="doctor-mock" type="checkbox" checked class="h-4 w-4 text-green-600 border-gray-300 rounded" />
+            <label for="doctor-mock" class="ml-2 text-sm text-gray-700">Use fast mock diagnosis (no AI call)</label>
+          </div>
+          <div class="flex items-end">
+            <button id="diagnose-btn" type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition">Diagnose &amp; Remedy</button>
+          </div>
+        </form>
+        
+        <!-- Loading State -->
+        <div id="doctor-loading" class="hidden mt-4">
+          <div class="flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-green-700"></div>
+            <span class="text-sm text-gray-600">Analyzing plant tissue and diagnosing pathology...</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div class="bg-green-600 h-2 rounded-full animate-pulse" style="width: 70%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crop Match Banner -->
+      <div id="crop-match-banner" class="hidden"></div>
+
+      <!-- Image Preview + Results Grid -->
+      <div id="doctor-result" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Image Preview Card -->
+        <div class="bg-white rounded-lg shadow p-4 lg:col-span-1">
+          <h3 class="text-md font-semibold text-gray-800 mb-3">Uploaded Leaf</h3>
+          <img id="result-image" class="w-full rounded border border-gray-200" />
+        </div>
+        
+        <!-- Diagnosis Card -->
+        <div class="bg-white rounded-lg shadow p-5 md:p-6 lg:col-span-1">
+          <h3 class="text-md font-semibold text-gray-800 mb-3">Diagnosis</h3>
+          <dl id="diagnosis-details" class="space-y-2 text-sm"></dl>
+        </div>
+        
+        <!-- Remedy Card -->
+        <div class="bg-white rounded-lg shadow p-5 md:p-6 lg:col-span-1">
+          <h3 class="text-md font-semibold text-gray-800 mb-3">Organic Kitchen Remedy</h3>
+          <div id="remedy-details" class="space-y-3 text-sm"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Economics Tab -->
+    <section id="economics" class="tab-content hidden space-y-6">
+      <div class="bg-white rounded-lg shadow p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-green-900 mb-4">Harvest Economics &amp; PDF Export</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Crop</label>
+            <select id="econ-crop" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
+              <option value="">Select a crop</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Number of pots: <span id="pot-count-display">4</span></label>
+            <input id="pot-count" type="range" min="1" max="50" value="4" class="w-full" />
+          </div>
+          <div class="flex items-end">
+            <button id="download-report" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition">Download PDF Report</button>
+          </div>
+        </div>
+
+        <div id="econ-summary" class="hidden bg-green-50 rounded-md p-4 text-sm space-y-1 mb-6"></div>
+
+        <h3 class="text-md font-semibold text-gray-800 mb-3">Current market prices</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="text-left px-3 py-2 font-semibold">Crop</th>
+                <th class="text-left px-3 py-2 font-semibold">Retail (LKR/kg)</th>
+                <th class="text-left px-3 py-2 font-semibold">Wholesale (LKR/kg)</th>
+                <th class="text-left px-3 py-2 font-semibold">Margin</th>
+              </tr>
+            </thead>
+            <tbody id="market-table-body" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div id="status-message" class="hidden fixed bottom-4 right-4 max-w-sm bg-gray-900 text-white text-sm px-4 py-3 rounded-md shadow-lg"></div>
+  </main>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    function showTab(name) {
+      tabs.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === name);
+      });
+      contents.forEach(sec => {
+        sec.classList.toggle('hidden', sec.id !== name);
+      });
+      if (name === 'planner' && map) {
+        setTimeout(() => map.invalidateSize(), 200);
+      }
+    }
+
+    tabs.forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
+
+    function showStatus(msg, isError = false) {
+      const el = document.getElementById('status-message');
+      el.textContent = msg;
+      el.className = `fixed bottom-4 right-4 max-w-sm text-white text-sm px-4 py-3 rounded-md shadow-lg ${isError ? 'bg-red-700' : 'bg-gray-900'}`;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        const text = await res.text().catch(() => 'Request failed');
+        throw new Error(text || `HTTP ${res.status}`);
+      }
+      return res;
+    }
+
+    // Month name helper
+    const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    function monthName(n) { return MONTH_NAMES[(n || 1) - 1] || String(n); }
+
+    // Space mode toggle
+    let spaceMode = 'area';
+    const spaceAreaBtn = document.getElementById('space-mode-area');
+    const spaceDimsBtn = document.getElementById('space-mode-dims');
+    const spaceAreaDiv = document.getElementById('space-area-input');
+    const spaceDimsDiv = document.getElementById('space-dims-input');
+    const spaceSqInput = document.getElementById('space_sqm');
+
+    spaceAreaBtn.addEventListener('click', () => {
+      spaceMode = 'area';
+      spaceAreaBtn.className = 'text-xs px-2 py-1 rounded-md bg-green-700 text-white font-medium transition';
+      spaceDimsBtn.className = 'text-xs px-2 py-1 rounded-md bg-gray-200 text-gray-700 font-medium transition';
+      spaceAreaDiv.classList.remove('hidden');
+      spaceDimsDiv.classList.add('hidden');
+    });
+    spaceDimsBtn.addEventListener('click', () => {
+      spaceMode = 'dims';
+      spaceDimsBtn.className = 'text-xs px-2 py-1 rounded-md bg-green-700 text-white font-medium transition';
+      spaceAreaBtn.className = 'text-xs px-2 py-1 rounded-md bg-gray-200 text-gray-700 font-medium transition';
+      spaceDimsDiv.classList.remove('hidden');
+      spaceAreaDiv.classList.add('hidden');
+      updateDimsCalc();
+    });
+
+    function toMeters(value, unit) {
+      if (unit === 'cm') return value / 100;
+      if (unit === 'ft') return value * 0.3048;
+      return value;
+    }
+
+    function updateDimsCalc() {
+      const len = parseFloat(document.getElementById('space-length').value) || 0;
+      const wid = parseFloat(document.getElementById('space-width').value) || 0;
+      const unit = document.getElementById('space-unit').value;
+      const lenM = toMeters(len, unit);
+      const widM = toMeters(wid, unit);
+      const sqm = lenM * widM;
+      const sqft = sqm * 10.7639;
+      const resultEl = document.getElementById('space-dims-result');
+      if (len > 0 && wid > 0) {
+        resultEl.innerHTML = `<span class="font-medium">Converted: ${sqm.toFixed(2)} m²</span> <span class="text-gray-400">(${sqft.toFixed(1)} sq ft)</span>`;
+        spaceSqInput.value = sqm.toFixed(2);
+      } else {
+        resultEl.textContent = '';
+        spaceSqInput.value = '';
+      }
+    }
+    document.getElementById('space-length').addEventListener('input', updateDimsCalc);
+    document.getElementById('space-width').addEventListener('input', updateDimsCalc);
+    document.getElementById('space-unit').addEventListener('change', updateDimsCalc);
+
+    // Weather emoji helper
+    function weatherEmoji(minC, maxC) {
+      const avg = (minC + maxC) / 2;
+      if (avg > 30) return '☀️';
+      if (avg > 25) return '⛅';
+      if (avg > 20) return '🌤️';
+      return '🌧️';
+    }
+
+    function weatherLabel(minC, maxC) {
+      const avg = (minC + maxC) / 2;
+      if (avg > 30) return 'Warm';
+      if (avg > 25) return 'Mild';
+      if (avg > 20) return 'Cool';
+      return 'Rainy';
+    }
+
+    // Load crops into selectors
+    let crops = [];
+    let marketPrices = [];
+    async function loadCrops() {
+      try {
+        crops = await (await apiFetch('/api/crops')).json();
+        const doctorSelect = document.getElementById('doctor-crop');
+        const econSelect = document.getElementById('econ-crop');
+        crops.forEach(c => {
+          const opt1 = new Option(c.name, c.name);
+          const opt2 = new Option(c.name, c.id);
+          doctorSelect.add(opt1);
+          econSelect.add(opt2);
+        });
+      } catch (err) {
+        showStatus('Could not load crops: ' + err.message, true);
+      }
+    }
+
+    async function loadMarketPrices() {
+      try {
+        marketPrices = await (await apiFetch('/api/market/prices')).json();
+        const tbody = document.getElementById('market-table-body');
+        tbody.innerHTML = marketPrices.map(p => `
+          <tr class="hover:bg-gray-50">
+            <td class="px-3 py-2">${p.crop_name}</td>
+            <td class="px-3 py-2">${p.retail_price_per_kg.toFixed(2)}</td>
+            <td class="px-3 py-2">${p.wholesale_price_per_kg.toFixed(2)}</td>
+            <td class="px-3 py-2">${p.margin_percent ? p.margin_percent.toFixed(1) + '%' : '-'}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        showStatus('Could not load market prices: ' + err.message, true);
+      }
+    }
+
+    // Planner location selection
+    let map = null;
+    let mapMarker = null;
+
+    function getLatLonInputs() {
+      const lat = parseFloat(document.getElementById('lat').value);
+      const lon = parseFloat(document.getElementById('lon').value);
+      return isNaN(lat) || isNaN(lon) ? [7.8731, 80.7718] : [lat, lon];
+    }
+
+    function setLatLonInputs(lat, lon) {
+      document.getElementById('lat').value = lat.toFixed(4);
+      document.getElementById('lon').value = lon.toFixed(4);
+    }
+
+    function initMap() {
+      if (map) return;
+      const mapContainer = document.getElementById('mapContainer');
+      const [lat, lon] = getLatLonInputs();
+      map = L.map(mapContainer).setView([lat, lon], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      mapMarker = L.marker([lat, lon], { draggable: true }).addTo(map);
+
+      mapMarker.on('dragend', () => {
+        const { lat, lng } = mapMarker.getLatLng();
+        setLatLonInputs(lat, lng);
+      });
+
+      map.on('click', (e) => {
+        mapMarker.setLatLng(e.latlng);
+        setLatLonInputs(e.latlng.lat, e.latlng.lng);
+      });
+    }
+
+    function updateMapView(lat, lon, zoom = 11) {
+      if (!map) return;
+      map.setView([lat, lon], zoom);
+      mapMarker.setLatLng([lat, lon]);
+    }
+
+    document.getElementById('districtSelect').addEventListener('change', (e) => {
+      if (!e.target.value) return;
+      const [lat, lon] = e.target.value.split(',').map(parseFloat);
+      setLatLonInputs(lat, lon);
+      if (document.getElementById('mapContainer').classList.contains('hidden')) {
+        document.getElementById('mapContainer').classList.remove('hidden');
+        initMap();
+      }
+      updateMapView(lat, lon, 11);
+      setTimeout(() => map.invalidateSize(), 210);
+    });
+
+    document.getElementById('currentLocationBtn').addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        showStatus('Geolocation is not supported by this browser.', true);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          setLatLonInputs(lat, lon);
+          if (document.getElementById('mapContainer').classList.contains('hidden')) {
+            document.getElementById('mapContainer').classList.remove('hidden');
+            initMap();
+          }
+          updateMapView(lat, lon, 13);
+          setTimeout(() => map.invalidateSize(), 210);
+        },
+        (err) => {
+          showStatus('Could not retrieve location: ' + err.message, true);
+        }
+      );
+    });
+
+    document.getElementById('pickOnMapBtn').addEventListener('click', () => {
+      const mapContainer = document.getElementById('mapContainer');
+      mapContainer.classList.toggle('hidden');
+      if (!mapContainer.classList.contains('hidden')) {
+        initMap();
+        const [lat, lon] = getLatLonInputs();
+        updateMapView(lat, lon, 11);
+        setTimeout(() => map.invalidateSize(), 210);
+      }
+    });
+
+    // Shared state & card builder for timeline views
+    let showClimateDetails = false;
+
+    function buildTimelineCard(week, showDetails) {
+      const phaseColor = week.phase_color || 'bg-gray-100 text-gray-800 border-gray-200';
+      const rh = week.relative_humidity_pct ?? 78;
+      const rhColor = rh > 80 ? 'bg-teal-500' : rh >= 60 ? 'bg-green-500' : 'bg-amber-500';
+      const rhLabel = rh > 80 ? 'Fungus risk' : rh >= 60 ? 'Optimal' : 'Dry stress';
+      const rainLower = (week.rainfall_pattern || '').toLowerCase();
+      const condEmoji = rainLower.includes('dry') || rainLower.includes('sunny') ? '☀️' :
+                        rainLower.includes('monsoon') || rainLower.includes('heavy') ? '🌧️' : '⛅';
+      const condRisk = rh > 80 ? ' · High Fungus Risk' : rainLower.includes('dry') ? ' · High Evaporation' : '';
+      const tip = week.action_tip || 'Monitor plant health and adjust care as needed.';
+      const detailClass = showDetails ? '' : 'hidden';
+      const precipStr = week.precipitation_mm != null ? `${week.precipitation_mm.toFixed(1)}mm` : '-';
+
+      return `
+        <div class="snap-start flex-shrink-0 min-w-[12rem] w-52 bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition">
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-gray-500">WEEK ${week.week_number}</span>
+              <span class="text-xs text-gray-400">${week.day_range}</span>
+            </div>
+            <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${phaseColor} mb-2">${week.phase_emoji} ${week.phase}</span>
+            <div class="bg-green-50 border border-green-200 rounded-md p-2 mb-2">
+              <div class="text-xs text-green-900 leading-relaxed">💡 ${tip}</div>
+            </div>
+            <div class="text-xs text-gray-600">${condEmoji} ${week.rainfall_pattern}${condRisk}</div>
+          </div>
+          <div class="climate-detail ${detailClass} border-t border-gray-100 bg-gray-50 px-4 py-2 space-y-1 text-xs text-gray-600">
+            <div>🌡️ Temp: ${week.avg_temp_range}</div>
+            <div class="flex items-center gap-2">
+              <span>💧 Humidity: ${rh}%</span>
+              <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                <div class="${rhColor} h-1.5 rounded-full" style="width: ${rh}%"></div>
+              </div>
+              <span class="text-gray-400 text-[10px]">${rhLabel}</span>
+            </div>
+            <div class="flex justify-between"><span>☀️ Daylight: ${week.daylight_avg}</span><span>🌧 ${precipStr}</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Climate details toggle handler
+    document.getElementById('climate-detail-toggle').addEventListener('click', function() {
+      showClimateDetails = !showClimateDetails;
+      this.textContent = showClimateDetails ? '⚙️ Hide Climate Details' : '⚙️ Show Climate Details';
+      this.classList.toggle('bg-green-100', showClimateDetails);
+      this.classList.toggle('text-green-700', showClimateDetails);
+      document.querySelectorAll('.climate-detail').forEach(el => {
+        el.classList.toggle('hidden', !showClimateDetails);
+      });
+    });
+
+    document.getElementById('planner-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Validate space input based on mode
+      let spaceSqm = parseFloat(document.getElementById('space_sqm').value);
+      if (spaceMode === 'dims') {
+        const len = parseFloat(document.getElementById('space-length').value);
+        const wid = parseFloat(document.getElementById('space-width').value);
+        if (!len || !wid || len <= 0 || wid <= 0) {
+          showStatus('Please enter valid length and width.', true);
+          return;
+        }
+        const unit = document.getElementById('space-unit').value;
+        spaceSqm = toMeters(len, unit) * toMeters(wid, unit);
+      } else {
+        if (!spaceSqm || spaceSqm <= 0) {
+          showStatus('Please enter a valid space area.', true);
+          return;
+        }
+      }
+
+      const payload = {
+        lat: parseFloat(document.getElementById('lat').value),
+        lon: parseFloat(document.getElementById('lon').value),
+        container_type: document.getElementById('container_type').value,
+        space_sqm: spaceSqm,
+        target_month: parseInt(document.getElementById('target_month').value, 10),
+      };
+      try {
+        const data = await (await apiFetch('/api/planner/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })).json();
+
+        const loc = data.location || {};
+        const fs = data.forecast_summary || {};
+        const targetMonthName = monthName(data.target_month);
+        
+        document.getElementById('planner-summary').innerHTML = `
+          <div><span class="text-gray-500">Location</span><br>Lat ${loc.lat || '-'}, Lon ${loc.lon || '-'}</div>
+          <div><span class="text-gray-500">Container</span><br>${data.container_type || '-'}</div>
+          <div><span class="text-gray-500">Space</span><br>${data.space_sqm ? data.space_sqm.toFixed(2) : '-'} m²</div>
+          <div><span class="text-gray-500">Target month</span><br><span class="font-semibold text-green-800">${targetMonthName}</span></div>
+          <div><span class="text-gray-500">Avg min temp</span><br>${fs.avg_min_temp_c != null ? fs.avg_min_temp_c.toFixed(1) : '-'} °C</div>
+          <div><span class="text-gray-500">Avg max temp</span><br>${fs.avg_max_temp_c != null ? fs.avg_max_temp_c.toFixed(1) : '-'} °C</div>
+          <div><span class="text-gray-500">Avg daylight</span><br>${fs.avg_daylight_hours != null ? fs.avg_daylight_hours.toFixed(1) : '-'} h/day</div>
+        `;
+
+        // Render weather cards and toggle logic
+        const weeklyForecast = data.weekly_forecast || [];
+        const cropTimeline = data.crop_timeline || null;
+        const isCurrentMonth = data.is_current_month !== false;
+        const weatherPanel = document.getElementById('weather-panel');
+        const weatherStrip = document.getElementById('weather-weekly-strip');
+        const cycleStrip = document.getElementById('weather-cycle-strip');
+        const view7day = document.getElementById('weather-7day-view');
+        const view4week = document.getElementById('weather-4week-view');
+        const btn7day = document.getElementById('weather-view-7day');
+        const btn4week = document.getElementById('weather-view-4week');
+        const panelHeading = document.getElementById('weather-panel-heading');
+
+        // For non-current months, show only first 7 days of historical data
+        const dailyCards = weeklyForecast.slice(0, 7);
+        
+        // Toggle handlers
+        btn7day.addEventListener('click', () => {
+          btn7day.className = 'text-xs px-3 py-1 rounded-md bg-green-700 text-white font-medium transition';
+          btn4week.className = 'text-xs px-3 py-1 rounded-md bg-gray-200 text-gray-700 font-medium transition';
+          view7day.classList.remove('hidden');
+          view4week.classList.add('hidden');
+        });
+        btn4week.addEventListener('click', () => {
+          btn4week.className = 'text-xs px-3 py-1 rounded-md bg-green-700 text-white font-medium transition';
+          btn7day.className = 'text-xs px-3 py-1 rounded-md bg-gray-200 text-gray-700 font-medium transition';
+          view4week.classList.remove('hidden');
+          view7day.classList.add('hidden');
+        });
+
+        // For non-current months, dim the 7-Day button with a tooltip
+        if (!isCurrentMonth) {
+          btn7day.title = 'Showing historical daily data from last year\'s ' + monthName(data.target_month);
+        } else {
+          btn7day.title = '';
+        }
+        
+        // Render 7-day daily cards
+        if (dailyCards.length > 0) {
+          const histNote = !isCurrentMonth ? `<div class="col-span-full text-xs text-amber-600 italic mb-1">📊 Typical Seasonal Conditions (${monthName(data.target_month)} baseline)</div>` : '';
+          weatherStrip.innerHTML = histNote + dailyCards.map(day => {
+            const minC = day.min_temp_c ?? 20;
+            const maxC = day.max_temp_c ?? 30;
+            const emoji = weatherEmoji(minC, maxC);
+            const label = weatherLabel(minC, maxC);
+            const dateStr = day.date ? day.date.slice(5).replace('-', '/') : '?';
+            const daylight = day.daylight_hours != null ? `${day.daylight_hours.toFixed(1)}h` : '-';
+            const precip = day.precipitation_mm != null ? `${day.precipitation_mm.toFixed(1)}mm` : '-';
+            
+            const avg = (minC + maxC) / 2;
+            const bandColor = avg > 30 ? 'bg-orange-400' : avg > 25 ? 'bg-yellow-400' : avg > 20 ? 'bg-blue-400' : 'bg-blue-600';
+            
+            return `
+              <div class="bg-gray-50 rounded-lg p-3 text-center border border-gray-100 hover:shadow-sm transition">
+                <div class="text-xs text-gray-500 mb-1">${dateStr}</div>
+                <div class="text-2xl mb-1">${emoji}</div>
+                <div class="text-xs font-medium text-gray-700">${label}</div>
+                <div class="text-xs text-gray-500 mt-1">${minC.toFixed(0)}–${maxC.toFixed(0)}°C</div>
+                <div class="w-full h-1 ${bandColor} rounded-full mt-2"></div>
+                <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+                  <span>☀ ${daylight}</span>
+                  <span>🌧 ${precip}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+        
+        // Render dynamic crop growth timeline
+        if (cropTimeline && cropTimeline.weeks && cropTimeline.weeks.length > 0) {
+          panelHeading.innerHTML = `📅 Growth &amp; Climate Timeline: <span class="text-green-800">${cropTimeline.crop_name}</span> <span class="text-gray-500 font-normal">· Month of ${monthName(data.target_month)} · ~${cropTimeline.harvest_days} days to harvest</span>`;
+          cycleStrip.innerHTML = cropTimeline.weeks.map(w => buildTimelineCard(w, showClimateDetails)).join('');
+        }
+        
+        // Show panel if either view has data
+        const hasTimeline = cropTimeline && cropTimeline.weeks && cropTimeline.weeks.length > 0;
+        if (dailyCards.length > 0 || hasTimeline) {
+          weatherPanel.classList.remove('hidden');
+          // Default to timeline view if it exists
+          if (hasTimeline) {
+            btn4week.click();
+          }
+        } else {
+          weatherPanel.classList.add('hidden');
+        }
+
+        // Render ranked recommendations with badges (clickable rows)
+        const tbody = document.getElementById('planner-table-body');
+        tbody.innerHTML = (data.recommendations || []).map((r, idx) => {
+          const crop = r.crop || {};
+          const rank = idx + 1;
+          const harvestDays = crop.days_to_harvest || '';
+          
+          let rankBadge = '';
+          let rowClass = 'hover:bg-gray-50 cursor-pointer transition';
+          
+          if (rank === 1) {
+            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">🏆 #1 Best</span>';
+            rowClass = 'bg-green-50 hover:bg-green-100 cursor-pointer transition';
+          } else if (rank === 2) {
+            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700 border border-gray-300">🥈 #2</span>';
+          } else if (rank === 3) {
+            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 border border-orange-200">🥉 #3</span>';
+          } else {
+            rankBadge = `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">#${rank}</span>`;
+          }
+          
+          return `
+            <tr class="${rowClass}" data-crop-name="${crop.name || ''}" data-harvest-days="${harvestDays}" title="Click to view growth timeline">
+              <td class="px-3 py-2">${rankBadge}</td>
+              <td class="px-3 py-2 font-medium">${crop.name || '-'} <span class="text-xs text-gray-400">→</span></td>
+              <td class="px-3 py-2">${r.suitability_score != null ? r.suitability_score : '-'}</td>
+              <td class="px-3 py-2">${r.layout || '-'}</td>
+              <td class="px-3 py-2">${r.notes || '-'}</td>
+            </tr>
+          `;
+        }).join('');
+
+        // Populate focus crop dropdown with recommended crops + "Other"
+        const focusSelect = document.getElementById('focus-crop-select');
+        const focusBar = document.getElementById('focus-crop-bar');
+        focusSelect.innerHTML = '<option value="">— select a crop —</option>';
+        (data.recommendations || []).forEach((r, idx) => {
+          const crop = r.crop || {};
+          if (crop.name) {
+            const opt = new Option(`${crop.name}${crop.days_to_harvest ? ' (~' + crop.days_to_harvest + 'd)' : ''}`, JSON.stringify({name: crop.name, days: crop.days_to_harvest || ''}));
+            focusSelect.add(opt);
+          }
+        });
+        // Add separator and "Other / Custom Plant" option
+        focusSelect.add(new Option('─────────────', ''));
+        focusSelect.add(new Option('Other / Custom Plant...', '__custom__'));
+        focusBar.classList.remove('hidden');
+
+        // Click handler for table rows → select in dropdown + fetch timeline
+        tbody.querySelectorAll('tr[data-crop-name]').forEach(row => {
+          row.addEventListener('click', () => {
+            const name = row.dataset.cropName;
+            const days = row.dataset.harvestDays;
+            // Find matching option
+            const matchVal = JSON.stringify({name, days});
+            for (let i = 0; i < focusSelect.options.length; i++) {
+              if (focusSelect.options[i].value === matchVal) {
+                focusSelect.selectedIndex = i;
+                break;
+              }
+            }
+            fetchAndRenderTimeline(name, days ? parseInt(days) : null, payload.target_month);
+          });
+        });
+
+        document.getElementById('planner-result').classList.remove('hidden');
+      } catch (err) {
+        showStatus('Planner failed: ' + err.message, true);
+      }
+    });
+
+    // Target month change listener — re-fetch plan when month changes
+    document.getElementById('target_month').addEventListener('change', () => {
+      const resultDiv = document.getElementById('planner-result');
+      if (!resultDiv.classList.contains('hidden')) {
+        // Re-submit the form to refresh the entire plan
+        document.getElementById('planner-form').requestSubmit();
+      }
+    });
+
+    // Image preview on file selection
+    document.getElementById('leaf-image').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          document.getElementById('image-preview').src = event.target.result;
+          document.getElementById('image-preview-container').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('doctor-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('leaf-image');
+      if (!fileInput.files.length) return;
+      
+      const diagnoseBtn = document.getElementById('diagnose-btn');
+      const loadingDiv = document.getElementById('doctor-loading');
+      const resultDiv = document.getElementById('doctor-result');
+      const bannerDiv = document.getElementById('crop-match-banner');
+      
+      // Show loading state
+      diagnoseBtn.disabled = true;
+      diagnoseBtn.textContent = 'Analyzing...';
+      loadingDiv.classList.remove('hidden');
+      resultDiv.classList.add('hidden');
+      bannerDiv.classList.add('hidden');
+      
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      const crop = document.getElementById('doctor-crop').value;
+      const useMock = document.getElementById('doctor-mock').checked;
+      const queryParams = new URLSearchParams();
+      queryParams.set('mock', useMock);
+      if (crop) queryParams.set('crop_name', crop);
+
+      try {
+        const data = await (await apiFetch(`/api/diagnose/upload?${queryParams.toString()}`, {
+          method: 'POST',
+          body: formData,
+        })).json();
+
+        const d = data.diagnosis || {};
+        
+        // Display uploaded image in result card
+        const resultImage = document.getElementById('result-image');
+        if (fileInput.files[0]) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            resultImage.src = event.target.result;
+          };
+          reader.readAsDataURL(fileInput.files[0]);
+        }
+        
+        // Crop confidence bar
+        const cropConf = d.crop_confidence != null ? d.crop_confidence : 0.85;
+        const cropConfPct = (cropConf * 100).toFixed(0);
+        
+        // Disease confidence bar
+        const diseaseConf = d.disease_confidence != null ? d.disease_confidence : 0.80;
+        const diseaseConfPct = (diseaseConf * 100).toFixed(0);
+        
+        document.getElementById('diagnosis-details').innerHTML = `
+          <div>
+            <dt class="font-medium text-gray-500">Plant Species</dt>
+            <dd class="font-semibold">${d.crop_detected || '-'}</dd>
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+              <div class="bg-blue-600 h-2 rounded-full" style="width: ${cropConfPct}%"></div>
+            </div>
+            <span class="text-xs text-gray-500">Confidence: ${cropConfPct}%</span>
+          </div>
+          <div class="pt-2">
+            <dt class="font-medium text-gray-500">Disease / Issue</dt>
+            <dd class="font-semibold">${d.issue_type || '-'}</dd>
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+              <div class="bg-red-600 h-2 rounded-full" style="width: ${diseaseConfPct}%"></div>
+            </div>
+            <span class="text-xs text-gray-500">Confidence: ${diseaseConfPct}%</span>
+          </div>
+          <div class="pt-2"><dt class="font-medium text-gray-500">Severity</dt><dd><span class="inline-block px-2 py-1 rounded text-xs font-medium ${
+            d.severity === 'high' ? 'bg-red-100 text-red-800' : 
+            d.severity === 'moderate' ? 'bg-yellow-100 text-yellow-800' : 
+            'bg-green-100 text-green-800'
+          }">${d.severity || '-'}</span></dd></div>
+          <div class="pt-2"><dt class="font-medium text-gray-500">Symptoms</dt><dd class="text-gray-700">${(d.symptoms || []).join(', ') || '-'}</dd></div>
+          <div class="pt-2"><dt class="font-medium text-gray-500">Recommended Action</dt><dd class="text-gray-700">${d.recommended_action || '-'}</dd></div>
+        `;
+
+        const r = data.linked_remedy || {};
+        const remedyTitle = r.remedy_name || r.title || 'Custom Organic Treatment';
+        
+        // Handle ingredients whether returned as Array or String
+        const ingredientsText = Array.isArray(r.ingredients)
+          ? r.ingredients.join(', ')
+          : (r.ingredients || '-');
+
+        // Handle preparation whether named preparation_steps or preparation (Array or String)
+        const prepRaw = r.preparation_steps || r.preparation || [];
+        const prepList = Array.isArray(prepRaw) ? prepRaw : [prepRaw];
+        const prepHtml = prepList.length
+          ? `<ol class="list-decimal list-inside mt-1 space-y-1">${prepList.map(s => `<li>${s.replace(/^\d+\.\s*/, '')}</li>`).join('')}</ol>`
+          : '-';
+
+        // Handle safety notes whether Array or String
+        const safetyText = Array.isArray(r.safety_notes)
+          ? r.safety_notes.join(', ')
+          : (r.safety_notes || '-');
+
+        document.getElementById('remedy-details').innerHTML = `
+          <p class="font-semibold text-green-900">${remedyTitle}</p>
+          <div><strong>Ingredients:</strong> ${ingredientsText}</div>
+          <div><strong>Preparation:</strong> ${prepHtml}</div>
+          <div><strong>Application schedule:</strong> ${r.application_schedule || '-'}</div>
+          <div><strong>Safety notes:</strong> ${safetyText}</div>
+        `;
+        
+        // Render crop match banner
+        const matchStatus = d.crop_match_status || 'auto_detected';
+        const matchMessage = d.crop_match_message || '';
+        
+        if (matchStatus === 'confirmed') {
+          bannerDiv.innerHTML = `
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+              <span class="text-green-600 text-xl mr-3">✓</span>
+              <span class="text-green-800 text-sm">${matchMessage}</span>
+            </div>
+          `;
+          bannerDiv.classList.remove('hidden');
+        } else if (matchStatus === 'mismatch') {
+          bannerDiv.innerHTML = `
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center">
+              <span class="text-amber-600 text-xl mr-3">⚠️</span>
+              <span class="text-amber-800 text-sm">${matchMessage}</span>
+            </div>
+          `;
+          bannerDiv.classList.remove('hidden');
+        }
+        
+        resultDiv.classList.remove('hidden');
+      } catch (err) {
+        showStatus('Diagnosis failed: ' + err.message, true);
+      } finally {
+        // Reset button state
+        diagnoseBtn.disabled = false;
+        diagnoseBtn.textContent = 'Diagnose & Remedy';
+        loadingDiv.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('pot-count').addEventListener('input', (e) => {
+      document.getElementById('pot-count-display').textContent = e.target.value;
+      updateEconSummary();
+    });
+    document.getElementById('econ-crop').addEventListener('change', updateEconSummary);
+
+    function getSelectedCrop() {
+      const id = parseInt(document.getElementById('econ-crop').value, 10);
+      return crops.find(c => c.id === id) || null;
+    }
+
+    function getMarketPrice(cropName) {
+      return marketPrices.find(p => p.crop_name === cropName) || null;
+    }
+
+    function updateEconSummary() {
+      const crop = getSelectedCrop();
+      const potCount = parseInt(document.getElementById('pot-count').value, 10);
+      const summary = document.getElementById('econ-summary');
+      if (!crop) {
+        summary.classList.add('hidden');
+        return;
+      }
+      const yieldPerPotG = crop.typical_yield_per_pot_g || 200;
+      const totalYieldKg = (yieldPerPotG * potCount) / 1000;
+      const price = getMarketPrice(crop.name);
+      const retailPrice = price ? price.retail_price_per_kg : 0;
+      const savings = totalYieldKg * retailPrice;
+      summary.innerHTML = `
+        <p><strong>Selected crop:</strong> ${crop.name}</p>
+        <p><strong>Expected total yield:</strong> ${totalYieldKg.toFixed(2)} kg (${potCount} pots × ${yieldPerPotG} g)</p>
+        <p><strong>Estimated grocery savings:</strong> LKR ${savings.toFixed(2)}</p>
+      `;
+      summary.dataset.yieldKg = totalYieldKg.toFixed(3);
+      summary.dataset.retailPrice = retailPrice.toFixed(2);
+      summary.dataset.savings = savings.toFixed(2);
+      summary.dataset.cropName = crop.name;
+      summary.classList.remove('hidden');
+    }
+
+    document.getElementById('download-report').addEventListener('click', async () => {
+      const crop = getSelectedCrop();
+      if (!crop) {
+        showStatus('Please select a crop first.', true);
+        return;
+      }
+      const summary = document.getElementById('econ-summary');
+      const yieldKg = parseFloat(summary.dataset.yieldKg || '0');
+      const retailPrice = parseFloat(summary.dataset.retailPrice || '0');
+      const savings = parseFloat(summary.dataset.savings || '0');
+      const cropName = summary.dataset.cropName || crop.name;
+
+      const payload = {
+        output_filename: `garden_report_${cropName.replace(/\s+/g, '_')}.pdf`,
+        plan_data: {
+          location: { lat: 6.9271, lon: 79.8612 },
+          container_type: 'Pot',
+          space_sqm: 2.0,
+          target_month: 8,
+          forecast_summary: { avg_min_temp_c: 24.5, avg_max_temp_c: 31.0, avg_daylight_hours: 12.0 },
+          recommendations: [{
+            crop: { name: crop.name, scientific_name: crop.scientific_name || '', category: crop.category || '' },
+            suitability_score: 95,
+            layout: `${document.getElementById('pot-count').value} pots`,
+            notes: `Expected yield ${yieldKg.toFixed(2)} kg based on typical pot yield.`
+          }]
+        },
+        diagnosis_data: null,
+        savings_data: {
+          crop_name: cropName,
+          expected_yield_kg: yieldKg,
+          retail_price_per_kg: retailPrice,
+          estimated_savings: savings,
+          currency: 'LKR'
+        }
+      };
+
+      try {
+        const res = await apiFetch('/api/report/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = payload.output_filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showStatus('Report downloaded successfully.');
+      } catch (err) {
+        showStatus('Report download failed: ' + err.message, true);
+      }
+    });
+
+    // ---------------------------------------------------------------------------
+    // Focus Crop Timeline — interactive selection + dynamic rendering
+    // ---------------------------------------------------------------------------
+    function renderCycleStrip(timeline) {
+      const cycleStrip = document.getElementById('weather-cycle-strip');
+      const panelHeading = document.getElementById('weather-panel-heading');
+      if (!timeline || !timeline.weeks || timeline.weeks.length === 0) {
+        cycleStrip.innerHTML = '<p class="text-sm text-gray-500 italic">No timeline available for this crop.</p>';
+        return;
+      }
+      const currentMonth = parseInt(document.getElementById('target_month').value, 10);
+      panelHeading.innerHTML = `📅 Growth &amp; Climate Timeline: <span class="text-green-800">${timeline.crop_name}</span> <span class="text-gray-500 font-normal">· Month of ${monthName(currentMonth)} · ~${timeline.harvest_days} days, ${timeline.total_weeks} weeks</span>`;
+      cycleStrip.innerHTML = timeline.weeks.map(week => buildTimelineCard(week, showClimateDetails)).join('');
+      // Switch to timeline view
+      document.getElementById('weather-view-4week').click();
+    }
+
+    async function fetchAndRenderTimeline(cropName, harvestDays, targetMonth) {
+      const loading = document.getElementById('focus-crop-loading');
+      loading.classList.remove('hidden');
+      try {
+        const body = {
+          crop_name: cropName,
+          target_month: targetMonth,
+          lat: parseFloat(document.getElementById('lat').value) || undefined,
+          lon: parseFloat(document.getElementById('lon').value) || undefined,
+        };
+        if (harvestDays) body.harvest_days = harvestDays;
+        const timeline = await (await apiFetch('/api/planner/timeline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })).json();
+        renderCycleStrip(timeline);
+      } catch (err) {
+        showStatus('Timeline failed: ' + err.message, true);
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+
+    // Focus crop dropdown change handler
+    document.getElementById('focus-crop-select').addEventListener('change', (e) => {
+      const val = e.target.value;
+      const customInputs = document.getElementById('custom-crop-inputs');
+      if (val === '__custom__') {
+        customInputs.classList.remove('hidden');
+        return;
+      }
+      customInputs.classList.add('hidden');
+      if (!val) return;
+      try {
+        const { name, days } = JSON.parse(val);
+        const month = parseInt(document.getElementById('target_month').value, 10);
+        fetchAndRenderTimeline(name, days ? parseInt(days) : null, month);
+      } catch { /* ignore parse errors for separator */ }
+    });
+
+    // Custom crop "Show Timeline" button
+    document.getElementById('custom-crop-go').addEventListener('click', () => {
+      const name = document.getElementById('custom-crop-name').value.trim();
+      const days = parseInt(document.getElementById('custom-crop-days').value, 10);
+      const month = parseInt(document.getElementById('target_month').value, 10);
+      if (!name) { showStatus('Enter a plant name.', true); return; }
+      if (!days || days < 1) { showStatus('Enter estimated days to harvest.', true); return; }
+      fetchAndRenderTimeline(name, days, month);
+    });
+
+    loadCrops();
+    loadMarketPrices();
+  </script>
+</body>
+</html>
