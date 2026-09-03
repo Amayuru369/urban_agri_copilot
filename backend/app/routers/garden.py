@@ -70,7 +70,7 @@ class AlertResolveResponse(BaseModel):
 
 
 @router.post("/plants", status_code=201)
-def create_plant(payload: PlantCreate, db: Session = Depends(get_db)):
+async def create_plant(payload: PlantCreate, db: Session = Depends(get_db)):
     """Register a new tracked plant for monitoring."""
     plant = TrackedPlant(
         crop_name=payload.crop_name,
@@ -85,11 +85,15 @@ def create_plant(payload: PlantCreate, db: Session = Depends(get_db)):
     db.add(plant)
     db.commit()
     db.refresh(plant)
+    
+    # STOP HERE. Do not add the try/except weather check.
+    # The frontend will trigger the evaluation automatically.
+    
     return {
         "id": plant.id,
         "crop_name": plant.crop_name,
         "planted_date": plant.planted_date.isoformat(),
-        "message": "Plant registered successfully. Monitoring active.",
+        "message": "Plant registered successfully.",
     }
 
 

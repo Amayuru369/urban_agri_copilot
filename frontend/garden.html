@@ -65,7 +65,6 @@
           <label for="telegram_chat_id" class="block text-xs font-medium text-gray-600 mb-1">Telegram Chat ID <span class="text-gray-400">(optional)</span></label>
           <input id="telegram_chat_id" type="text" placeholder="e.g. 123456789" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
         </div>
-        <!-- Location Name Label -->
         <div>
           <label for="location_name" class="block text-xs font-medium text-gray-600 mb-1">Location Label</label>
           <input id="location_name" type="text" placeholder="e.g. Back Garden or Colombo" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
@@ -73,16 +72,41 @@
 
         <!-- Full Width Map Container -->
         <div class="sm:col-span-2 lg:col-span-4 mt-2">
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-medium text-gray-600">Pin Garden Location (Click or Drag Marker)</label>
-            <span class="text-[11px] text-gray-500">Selected: <b id="coords-display" class="text-gray-700">6.9271, 79.8612</b></span>
+          <div class="mb-3">
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5">Garden Coordinates</label>
+            <div class="grid grid-cols-2 gap-3 mb-2">
+              <div>
+                <label for="latitude" class="block text-[11px] font-medium text-gray-500 mb-1">Latitude (°N/S)</label>
+                <input
+                  type="number"
+                  step="any"
+                  id="latitude"
+                  name="latitude"
+                  placeholder="e.g. 6.9271"
+                  class="w-full px-3 py-1.5 text-xs rounded border border-gray-300 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                />
+              </div>
+              <div>
+                <label for="longitude" class="block text-[11px] font-medium text-gray-500 mb-1">Longitude (°E/W)</label>
+                <input
+                  type="number"
+                  step="any"
+                  id="longitude"
+                  name="longitude"
+                  placeholder="e.g. 79.8612"
+                  class="w-full px-3 py-1.5 text-xs rounded border border-gray-300 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                />
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-gray-400">
+              <span>Type coordinates directly or drag/click the map pin below.</span>
+              <span id="coords-display" class="font-mono text-gray-600 font-medium"></span>
+            </div>
           </div>
-          <div id="map" class="w-full h-56 rounded-md border border-gray-300 z-0"></div>
-          <input type="hidden" id="latitude" value="6.9271" />
-          <input type="hidden" id="longitude" value="79.8612" />
+
+          <div id="map" class="h-56 w-full rounded border border-gray-200"></div>
         </div>
 
-        <!-- Submit Controls -->
         <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-3 pt-2">
           <button type="submit" id="submit-btn" class="bg-green-700 text-white text-sm font-medium px-6 py-2.5 rounded-md hover:bg-green-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
             Add Plant
@@ -142,7 +166,7 @@
     </div>
   </footer>
 
-<!-- Alert History Modal -->
+  <!-- Alert History Modal -->
   <div id="history-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl max-w-lg w-full p-5 shadow-2xl max-h-[85vh] flex flex-col">
       <div class="flex items-center justify-between pb-3 border-b border-gray-200">
@@ -153,10 +177,7 @@
         <button onclick="closeAlertHistory()" class="text-gray-400 hover:text-gray-600 text-lg font-bold px-2 py-1">✕</button>
       </div>
 
-      <!-- Scrollable list -->
-      <div id="history-modal-content" class="py-3 overflow-y-auto space-y-3 flex-1">
-        <!-- Injected dynamically -->
-      </div>
+      <div id="history-modal-content" class="py-3 overflow-y-auto space-y-3 flex-1"></div>
 
       <div class="pt-3 border-t border-gray-200 text-right">
         <button onclick="closeAlertHistory()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-4 py-2 rounded-md transition">
@@ -171,19 +192,16 @@
 // Configuration
 // ---------------------------------------------------------------------------
 const API_BASE = '/api/garden';
-const DEFAULT_LAT = 6.9271;   // Colombo
+const DEFAULT_LAT = 6.9271;
 const DEFAULT_LON = 79.8612;
 
-// Crop emoji map
 const CROP_EMOJI = {
   'Tomato': '🍅',
   'Chilli': '🌶️',
   'Gotukola': '🥬',
 };
 
-//location
-
-const defaultCoords = [6.9271, 79.8612];
+const defaultCoords = [DEFAULT_LAT, DEFAULT_LON];
 const map = L.map('map').setView(defaultCoords, 10);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -193,23 +211,50 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const marker = L.marker(defaultCoords, { draggable: true }).addTo(map);
 
-function updateLocation(lat, lon) {
-  document.getElementById('latitude').value = lat.toFixed(4);
-  document.getElementById('longitude').value = lon.toFixed(4);
-  document.getElementById('coords-display').textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+function updateLocation(lat, lon, panMap = false) {
+  const numericLat = parseFloat(lat);
+  const numericLon = parseFloat(lon);
+
+  document.getElementById('latitude').value = numericLat.toFixed(4);
+  document.getElementById('longitude').value = numericLon.toFixed(4);
+  
+  const display = document.getElementById('coords-display');
+  if (display) {
+    display.textContent = `${numericLat.toFixed(4)}, ${numericLon.toFixed(4)}`;
+  }
+
+  if (marker) {
+    marker.setLatLng([numericLat, numericLon]);
+  }
+  if (panMap && map) {
+    map.panTo([numericLat, numericLon]);
+  }
 }
 
 marker.on('dragend', () => {
   const { lat, lng } = marker.getLatLng();
-  updateLocation(lat, lng);
+  updateLocation(lat, lng, false);
 });
 
 map.on('click', (e) => {
-  marker.setLatLng(e.latlng);
-  updateLocation(e.latlng.lat, e.latlng.lng);
+  updateLocation(e.latlng.lat, e.latlng.lng, false);
 });
 
-// Progress bar color thresholds
+const latInput = document.getElementById('latitude');
+const lonInput = document.getElementById('longitude');
+
+function handleManualCoords() {
+  const lat = parseFloat(latInput.value);
+  const lon = parseFloat(lonInput.value);
+
+  if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+    updateLocation(lat, lon, true);
+  }
+}
+
+latInput.addEventListener('input', handleManualCoords);
+lonInput.addEventListener('input', handleManualCoords);
+
 function progressColor(pct) {
   if (pct >= 80) return 'bg-green-600';
   if (pct >= 50) return 'bg-green-500';
@@ -217,7 +262,6 @@ function progressColor(pct) {
   return 'bg-lime-400';
 }
 
-// Alert badge styles
 function alertBadgeClass(type) {
   if (type === 'weather') return 'bg-red-50 border-red-200 text-red-800';
   return 'bg-green-50 border-green-200 text-green-800';
@@ -234,7 +278,13 @@ async function apiFetch(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    let errorMsg = `HTTP ${res.status}`;
+    if (typeof err.detail === 'string') {
+      errorMsg = err.detail;
+    } else if (Array.isArray(err.detail)) {
+      errorMsg = err.detail.map(d => `${d.loc ? d.loc.slice(-1)[0] : 'field'}: ${d.msg}`).join(', ');
+    }
+    throw new Error(errorMsg);
   }
   return res;
 }
@@ -242,20 +292,23 @@ async function apiFetch(url, options = {}) {
 // ---------------------------------------------------------------------------
 // Dashboard Rendering
 // ---------------------------------------------------------------------------
-async function loadDashboard() {
+async function loadDashboard(refresh = false) {
   const loading = document.getElementById('loading');
   const grid = document.getElementById('dashboard-grid');
   const empty = document.getElementById('empty-state');
 
-  loading.classList.remove('hidden');
-  grid.innerHTML = '';
-  empty.classList.add('hidden');
+  const isFirstLoad = grid.children.length === 0;
+  if (isFirstLoad) {
+    loading.classList.remove('hidden');
+    grid.innerHTML = '';
+    empty.classList.add('hidden');
+  }
 
   try {
-    const data = await (await apiFetch(`${API_BASE}/dashboard`)).json();
+    const url = refresh ? `${API_BASE}/dashboard?refresh=true` : `${API_BASE}/dashboard`;
+    const data = await (await apiFetch(url)).json();
     const plants = data.plants || [];
 
-    // Update stats
     const totalAlerts = plants.reduce((sum, p) => sum + (p.unresolved_alerts || []).length, 0);
     const milestones = plants.reduce((sum, p) => sum + (p.unresolved_alerts || []).filter(a => a.alert_type === 'milestone').length, 0);
     const weather = plants.reduce((sum, p) => sum + (p.unresolved_alerts || []).filter(a => a.alert_type === 'weather').length, 0);
@@ -266,16 +319,126 @@ async function loadDashboard() {
     document.getElementById('stat-weather').textContent = weather;
 
     if (plants.length === 0) {
+      grid.innerHTML = '';
       empty.classList.remove('hidden');
       return;
     }
 
     grid.innerHTML = plants.map(plant => buildPlantCard(plant)).join('');
   } catch (err) {
-    grid.innerHTML = `<div class="col-span-full text-center py-8 text-sm text-red-600">Failed to load dashboard: ${err.message}</div>`;
+    if (isFirstLoad) {
+      grid.innerHTML = `<div class="col-span-full text-center py-8 text-sm text-red-600">Failed to load dashboard: ${err.message}</div>`;
+    }
   } finally {
     loading.classList.add('hidden');
   }
+}
+
+function getAlertTheme(message, alertType) {
+  const text = (message || '').toLowerCase();
+
+  if (alertType === 'milestone') {
+    return {
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-300',
+      text: 'text-emerald-900',
+      iconBg: 'bg-emerald-100',
+      icon: '🌱',
+      badge: 'bg-emerald-200 text-emerald-800'
+    };
+  }
+  if (text.includes('frost') || text.includes('cold')) {
+    return {
+      bg: 'bg-cyan-50',
+      border: 'border-cyan-300',
+      text: 'text-cyan-900',
+      iconBg: 'bg-cyan-100',
+      icon: '❄️',
+      badge: 'bg-cyan-200 text-cyan-800'
+    };
+  }
+  if (text.includes('heat')) {
+    return {
+      bg: 'bg-orange-50',
+      border: 'border-orange-300',
+      text: 'text-orange-900',
+      iconBg: 'bg-orange-100',
+      icon: '🔥',
+      badge: 'bg-orange-200 text-orange-800'
+    };
+  }
+  if (text.includes('rain')) {
+    return {
+      bg: 'bg-blue-50',
+      border: 'border-blue-300',
+      text: 'text-blue-900',
+      iconBg: 'bg-blue-100',
+      icon: '🌧️',
+      badge: 'bg-blue-200 text-blue-800'
+    };
+  }
+  if (text.includes('wind')) {
+    return {
+      bg: 'bg-teal-50',
+      border: 'border-teal-300',
+      text: 'text-teal-900',
+      iconBg: 'bg-teal-100',
+      icon: '💨',
+      badge: 'bg-teal-200 text-teal-800'
+    };
+  }
+
+  return {
+    bg: 'bg-rose-50',
+    border: 'border-rose-300',
+    text: 'text-rose-900',
+    iconBg: 'bg-rose-100',
+    icon: '⚠️',
+    badge: 'bg-rose-200 text-rose-800'
+  };
+}
+
+function appendPlantPlaceholder(cropName, locationName) {
+  const grid = document.getElementById('dashboard-grid');
+  const empty = document.getElementById('empty-state');
+  
+  if (empty) empty.classList.add('hidden');
+
+  const placeholder = document.createElement('div');
+  placeholder.id = 'plant-loading-skeleton';
+  placeholder.className = 'bg-white rounded-xl border border-dashed border-emerald-300 p-5 shadow-sm flex flex-col justify-between min-h-[260px] animate-pulse';
+  placeholder.innerHTML = `
+    <div>
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-sm font-bold">
+            🌱
+          </div>
+          <div>
+            <h4 class="font-semibold text-gray-800 text-base">${escapeHtml(cropName || 'New Plant')}</h4>
+            <p class="text-xs text-gray-400">📍 ${escapeHtml(locationName || 'Evaluating location...')}</p>
+          </div>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+          Evaluating...
+        </span>
+      </div>
+
+      <div class="py-6 flex flex-col items-center justify-center text-center">
+        <div class="w-7 h-7 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p class="text-sm font-medium text-gray-700">Connecting to Open-Meteo...</p>
+        <p class="text-xs text-gray-400 mt-1">Analyzing microclimate & generating alerts</p>
+      </div>
+    </div>
+
+    <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+      <div class="h-full bg-emerald-400 rounded-full w-2/3 animate-pulse"></div>
+    </div>
+  `;
+
+  grid.appendChild(placeholder);
+  placeholder.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function buildPlantCard(plant) {
@@ -285,18 +448,21 @@ function buildPlantCard(plant) {
   const alertCount = alerts.length;
 
   const alertsHtml = alerts.length > 0
-    ? `<div class="space-y-2 mt-3 pt-3 border-t border-gray-100">${alerts.map(a => `
-        <div class="alert-badge flex items-start gap-2 p-2 rounded-md border ${alertBadgeClass(a.alert_type)}">
-          <span class="text-sm flex-shrink-0 mt-0.5">${alertIcon(a.alert_type)}</span>
+    ? `<div class="space-y-2 mt-3 pt-3 border-t border-gray-100">${alerts.map(a => {
+        const theme = getAlertTheme(a.message, a.alert_type);
+        return `
+        <div class="alert-badge flex items-start gap-2 p-2 rounded-md border ${theme.border} ${theme.bg}">
+          <span class="text-sm flex-shrink-0 mt-0.5">${theme.icon}</span>
           <div class="flex-1 min-w-0">
-            <p class="text-xs leading-relaxed">${escapeHtml(a.message)}</p>
-            ${a.action_required ? `<p class="text-[10px] text-gray-600 mt-0.5 leading-relaxed">👉 ${escapeHtml(a.action_required)}</p>` : ''}
+            <p class="text-xs font-semibold ${theme.text} leading-relaxed">${escapeHtml(a.message)}</p>
+            ${a.action_required ? `<p class="text-[10px] text-gray-700 mt-0.5 leading-relaxed">👉 ${escapeHtml(a.action_required)}</p>` : ''}
           </div>
           <button onclick="resolveAlert(${a.id}, this)" class="flex-shrink-0 text-[10px] font-medium px-2 py-1 rounded bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition" title="Mark as done">
             ✓ Done
           </button>
         </div>
-      `).join('')}</div>`
+      `;
+      }).join('')}</div>`
     : `<div class="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-400 italic">No active alerts</div>`;
 
   return `
@@ -367,7 +533,6 @@ async function resolveAlert(alertId, btnEl) {
 
   try {
     await apiFetch(`${API_BASE}/alerts/${alertId}/resolve`, { method: 'PATCH' });
-    // Remove the alert badge from DOM with animation
     const badge = btnEl.closest('.alert-badge');
     if (badge) {
       badge.style.transition = 'opacity 0.3s, transform 0.3s';
@@ -386,7 +551,6 @@ async function resolveAlert(alertId, btnEl) {
 }
 
 function updateAlertCounts() {
-  // Recalculate stats from remaining DOM badges
   const cards = document.querySelectorAll('#dashboard-grid > div');
   let total = 0, milestones = 0, weather = 0;
   cards.forEach(card => {
@@ -396,7 +560,6 @@ function updateAlertCounts() {
       if (b.classList.contains('border-red-200') || b.querySelector('.text-red-800')) weather++;
       else milestones++;
     });
-    // Update card badge count
     const countBadge = card.querySelector('[class*="bg-amber-100"]');
     if (countBadge) {
       const remaining = card.querySelectorAll('.alert-badge').length;
@@ -414,58 +577,66 @@ function updateAlertCounts() {
 // ---------------------------------------------------------------------------
 document.getElementById('plant-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const btn = document.getElementById('submit-btn');
+
+  const btn = e.target.querySelector('button[type="submit"]');
   const status = document.getElementById('form-status');
 
-  const select = document.getElementById('crop_name');
-  const cropName = select.value === '__custom__'
-    ? document.getElementById('custom_crop').value.trim()
-    : select.value;
+  const cropNameInput = document.getElementById('crop_name').value;
+  const cropName = cropNameInput === '__custom__'
+    ? document.getElementById('custom_crop').value
+    : cropNameInput;
+  const locationName = document.getElementById('location_name').value;
 
-  if (!cropName) {
-    status.textContent = 'Please enter a crop name.';
-    status.className = 'text-xs text-red-600';
-    return;
-  }
+  const latRaw = parseFloat(document.getElementById('latitude').value);
+  const lonRaw = parseFloat(document.getElementById('longitude').value);
+  const latitude = !isNaN(latRaw) ? latRaw : DEFAULT_LAT;
+  const longitude = !isNaN(lonRaw) ? lonRaw : DEFAULT_LON;
+
+  const telegramVal = document.getElementById('telegram_chat_id').value.trim();
 
   const payload = {
     crop_name: cropName,
-    pot_size_liters: parseFloat(document.getElementById('pot_size_liters').value) || 15.0,
+    pot_size_liters: parseFloat(document.getElementById('pot_size_liters').value),
     planted_date: document.getElementById('planted_date').value,
-    latitude: parseFloat(document.getElementById('latitude').value),
-    longitude: parseFloat(document.getElementById('longitude').value),
-    location_name: document.getElementById('location_name').value.trim() || 'Home Garden',
-    telegram_chat_id: document.getElementById('telegram_chat_id').value.trim() || null,
+    telegram_chat_id: telegramVal.length > 0 ? telegramVal : null,
+    location_name: locationName || 'Home Garden',
+    latitude: latitude,
+    longitude: longitude,
   };
 
-  btn.disabled = true;
-  btn.textContent = 'Registering...';
-  status.textContent = '';
-
   try {
+    btn.disabled = true;
+    btn.textContent = 'Registering...';
+    status.textContent = '';
+
     const res = await apiFetch(`${API_BASE}/plants`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
     const data = await res.json();
+    
     status.textContent = `✓ ${data.crop_name} registered (ID #${data.id})`;
     status.className = 'text-xs text-green-700 font-medium';
-    // Reset form
-    document.getElementById('planted_date').value = '';
+
+    appendPlantPlaceholder(data.crop_name, locationName);
+
     document.getElementById('telegram_chat_id').value = '';
-    // Refresh dashboard
-    await loadDashboard();
+    document.getElementById('location_name').value = '';
+
+    await loadDashboard(true);
+
   } catch (err) {
     status.textContent = `✗ ${err.message}`;
     status.className = 'text-xs text-red-600';
+    const skeleton = document.getElementById('plant-loading-skeleton');
+    if (skeleton) skeleton.remove();
   } finally {
     btn.disabled = false;
     btn.textContent = 'Add Plant';
   }
-});
+}); 
 
-// Custom crop input toggle
 document.getElementById('crop_name').addEventListener('change', (e) => {
   const customInput = document.getElementById('custom_crop');
   if (e.target.value === '__custom__') {
@@ -476,8 +647,13 @@ document.getElementById('crop_name').addEventListener('change', (e) => {
   }
 });
 
-// Refresh button
-document.getElementById('refresh-btn').addEventListener('click', () => loadDashboard());
+document.getElementById('refresh-btn').addEventListener('click', async () => {
+  try {
+    await loadDashboard(true);
+  } catch (err) {
+    console.warn('Dashboard refresh failed:', err);
+  }
+});
 
 // ---------------------------------------------------------------------------
 // Alert History & Restoration
@@ -513,7 +689,7 @@ async function openAlertHistory(plantId, cropName) {
         ${a.action_required ? `<p class="mt-1 text-[11px] opacity-90">👉 ${escapeHtml(a.action_required)}</p>` : ''}
         
         <div class="mt-2.5 pt-2 border-t border-gray-200/60 flex items-center justify-between">
-          <span class="text-[10px] font-semibold ${a.resolved ? 'text-gray-400' : 'text-amber-700'}">
+          <span class="text-[11px] font-medium ${a.resolved ? 'text-gray-500' : 'text-amber-700'}">
             ${a.resolved ? '✓ Marked as Completed' : '⚠️ Active Alert'}
           </span>
           ${a.resolved ? `
@@ -546,6 +722,19 @@ function closeAlertHistory() {
   document.getElementById('history-modal').classList.add('hidden');
 }
 
+async function archivePlant(plantId, cropName) {
+  if (!confirm(`Are you sure you want to archive "${cropName}" (ID #${plantId})? It will be removed from your active garden.`)) {
+    return;
+  }
+
+  try {
+    await apiFetch(`${API_BASE}/plants/${plantId}`, { method: 'DELETE' });
+    await loadDashboard(false);
+  } catch (err) {
+    alert('Failed to archive plant: ' + err.message);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Utilities
 // ---------------------------------------------------------------------------
@@ -556,13 +745,12 @@ function escapeHtml(str) {
 }
 
 // ---------------------------------------------------------------------------
-// Init — set default date and load dashboard
+// Init
 // ---------------------------------------------------------------------------
 (function init() {
-  // Set planted_date default to today
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('planted_date').value = today;
-  // Load dashboard
+  updateLocation(DEFAULT_LAT, DEFAULT_LON, true);
   loadDashboard();
 })();
 </script>
