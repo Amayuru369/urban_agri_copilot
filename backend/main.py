@@ -14,7 +14,7 @@ from backend.app.core.database import Base, engine, SessionLocal
 from backend.app.models import garden as _garden_models  # noqa: F401 — ensure models are registered
 from backend.app.models.garden import SystemAuditLog
 from backend.app.routers import crops, diagnose, garden, market, planner, remedy, report, weather
-from backend.app.services.garden_monitor import evaluate_garden_state
+from backend.app.services.garden_monitor import evaluate_garden_state, send_daily_morning_digest
 from backend.seed_data import seed_all
 
 scheduler = AsyncIOScheduler()
@@ -36,6 +36,14 @@ async def _run_garden_monitor(trigger_type: str = "CRON_SCHEDULED"):
         )
         db.add(audit)
         db.commit()
+
+        # Send morning digest only for scheduled cron runs (not on STARTUP)
+        if trigger_type == "CRON_SCHEDULED":
+            try:
+                await send_daily_morning_digest(db, count or 0)
+            except Exception as digest_err:
+                print(f"[Scheduler] Morning digest failed (non-critical): {digest_err}", flush=True)
+
     except Exception as e:
         print(f"[Scheduler] Run failed with error: {e}", flush=True)
         # Record failure audit entry

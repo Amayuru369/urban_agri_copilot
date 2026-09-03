@@ -256,6 +256,60 @@ async def send_telegram_alert(chat_id: str, text: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Daily Morning Digest
+# ---------------------------------------------------------------------------
+
+async def send_daily_morning_digest(db: Session, alert_count: int) -> None:
+    """Send a consolidated morning briefing to all registered Telegram chats."""
+    plants = db.query(TrackedPlant).filter(TrackedPlant.active == True).all()  # noqa: E712
+
+    if not plants:
+        logger.debug("[Morning Digest] No active plants; skipping digest.")
+        return
+
+    # Collect unique target chat IDs
+    target_chat_ids: set[str] = set()
+    for plant in plants:
+        chat_id = (
+            plant.telegram_chat_id
+            or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+            or getattr(settings, "TELEGRAM_CHAT_ID", None)
+        )
+        if chat_id:
+            target_chat_ids.add(chat_id)
+
+    if not target_chat_ids:
+        logger.debug("[Morning Digest] No Telegram chat IDs resolved; skipping digest.")
+        return
+
+    # Build message
+    if alert_count == 0:
+        message = (
+            "🌅 <b>Daily Farm Briefing — 06:00 AM</b>\n\n"
+            f"• <b>Active Crops:</b> {len(plants)} plant(s) monitored\n"
+            "• <b>Status:</b> All crops healthy & conditions normal\n"
+            "• <b>Weather Risks:</b> None detected\n"
+            "• <b>Next Scheduled Scan:</b> Tomorrow at 06:00 AM"
+        )
+    else:
+        message = (
+            "⚠️ <b>Daily Farm Briefing — 06:00 AM</b>\n\n"
+            f"• <b>Active Crops:</b> {len(plants)} plant(s) monitored\n"
+            f"• <b>Urgent Advisories:</b> {alert_count} active alert(s) requiring attention\n"
+            "• Please review your Garden Dashboard for specific action steps."
+        )
+
+    # Dispatch to each unique chat
+    for chat_id in target_chat_ids:
+        try:
+            await send_telegram_alert(chat_id, message)
+        except Exception as e:
+            logger.warning("[Morning Digest] Failed to send digest to chat %s: %s", chat_id, e)
+
+    logger.info("[Morning Digest] Sent briefing to %d chat(s).", len(target_chat_ids))
+
+
+# ---------------------------------------------------------------------------
 # Core Evaluation Engine
 # ---------------------------------------------------------------------------
 
