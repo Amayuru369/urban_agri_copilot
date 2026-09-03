@@ -1,8 +1,10 @@
+
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -19,15 +21,15 @@ scheduler = AsyncIOScheduler()
 
 async def _run_garden_monitor():
     """Wrapper to open a DB session and run the garden evaluation."""
+    print("[Scheduler] Triggering garden monitor job now...", flush=True)
     db = SessionLocal()
     try:
-        await evaluate_garden_state(db)
+        count = await evaluate_garden_state(db)
+        print(f"[Scheduler] Evaluation finished. Generated {count} alerts.", flush=True)
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error("[Garden Monitor] Scheduled run failed: %s", e)
+        print(f"[Scheduler] Run failed with error: {e}", flush=True)
     finally:
         db.close()
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,10 +37,10 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     seed_all()
 
-    # Run garden monitor once immediately on startup
+    # Run once immediately on startup
     await _run_garden_monitor()
 
-    # Schedule daily evaluation at 06:00 AM (server local time)
+    # Run daily at 06:00 AM server time
     scheduler.add_job(
         _run_garden_monitor,
         trigger=CronTrigger(hour=6, minute=0),
