@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     QODER_PERSONAL_ACCESS_TOKEN: str | None = None
     QODER_VISION_ENDPOINT: str | None = None
 
+   # Telegram Bot API token for the Plant Monitoring & Alert System.
+    # Create a bot via @BotFather and set TELEGRAM_BOT_TOKEN in your .env file.
+    TELEGRAM_BOT_TOKEN: str | None = None
+    TELEGRAM_DEFAULT_CHAT_ID: str | None = None
+
     ALLOWED_ORIGINS: list[str] = ["*"]
 
 

@@ -1,21 +1,56 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.core.config import settings
-from backend.app.core.database import Base, engine
-from backend.app.routers import crops, diagnose, market, planner, remedy, report, weather
+from backend.app.core.database import Base, engine, SessionLocal
+from backend.app.models import garden as _garden_models  # noqa: F401 — ensure models are registered
+from backend.app.routers import crops, diagnose, garden, market, planner, remedy, report, weather
+from backend.app.services.garden_monitor import evaluate_garden_state
 from backend.seed_data import seed_all
+
+scheduler = AsyncIOScheduler()
+
+
+async def _run_garden_monitor():
+    """Wrapper to open a DB session and run the garden evaluation."""
+    db = SessionLocal()
+    try:
+        await evaluate_garden_state(db)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error("[Garden Monitor] Scheduled run failed: %s", e)
+    finally:
+        db.close()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # --- Startup ---
     Base.metadata.create_all(bind=engine)
     seed_all()
+
+    # Run garden monitor once immediately on startup
+    await _run_garden_monitor()
+
+    # Schedule daily evaluation at 06:00 AM (server local time)
+    scheduler.add_job(
+        _run_garden_monitor,
+        trigger=CronTrigger(hour=6, minute=0),
+        id="garden_monitor_daily",
+        replace_existing=True,
+    )
+    scheduler.start()
+
     yield
+
+    # --- Shutdown ---
+    scheduler.shutdown(wait=False)
 
 
 app = FastAPI(
@@ -40,6 +75,7 @@ app.include_router(planner.router, prefix="/api")
 app.include_router(diagnose.router, prefix="/api")
 app.include_router(remedy.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
+app.include_router(garden.router, prefix="/api")
 
 
 @app.get("/api/health")
