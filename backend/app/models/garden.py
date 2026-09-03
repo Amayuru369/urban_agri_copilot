@@ -1,6 +1,8 @@
 """SQLAlchemy models for the Plant Monitoring & Alert System."""
 
-from sqlalchemy import Boolean, Column, Date, Float, ForeignKey, Integer, String, Text
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from backend.app.core.database import Base
@@ -41,3 +43,16 @@ class PlantAlert(Base):
 
     # Relationship back to plant
     plant = relationship("TrackedPlant", back_populates="alerts")
+
+
+class SystemAuditLog(Base):
+    """Audit trail for autonomous background monitor executions."""
+
+    __tablename__ = "system_audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    trigger_type = Column(String(50), default="CRON_SCHEDULED")
+    action = Column(String(100))
+    details = Column(Text)
+    status = Column(String(20), default="SUCCESS")

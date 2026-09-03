@@ -411,32 +411,19 @@ async def evaluate_garden_state(db: Session) -> int:
                     )
                     asyncio.create_task(send_telegram_alert(target_chat, tg_text))
 
-
-                    from backend.app.core.database import SessionLocal  # Adjust to your SessionLocal import path
-
-async def run_scheduled_evaluation():
-    """Background task entrypoint with its own managed DB session."""
-    logger.info("[Scheduler] Running daily morning garden evaluation...")
-    db: Session = SessionLocal()
-    try:
-        count = await evaluate_garden_state(db)
-        logger.info("[Scheduler] Morning evaluation complete. %d new alert(s) generated.", count)
-    except Exception as e:
-        logger.exception("[Scheduler] Error during scheduled garden evaluation: %s", e)
-    finally:
-        db.close()
-
     db.commit()
     logger.info("[Garden Monitor] Evaluation complete. %d new alert(s) generated.", new_alert_count)
     return new_alert_count
 
+
 # ---------------------------------------------------------------------------
-# Scheduler Entrypoint (Completely new function below evaluate_garden_state)
+# Scheduler Entrypoint
 # ---------------------------------------------------------------------------
-from backend.app.core.database import SessionLocal  # Adjust if your database.py path differs
 
 async def run_scheduled_evaluation():
     """Background task entrypoint with its own managed DB session."""
+    from backend.app.core.database import SessionLocal
+
     logger.info("[Scheduler] Running daily morning garden evaluation...")
     db: Session = SessionLocal()
     try:

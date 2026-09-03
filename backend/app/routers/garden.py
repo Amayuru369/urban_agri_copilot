@@ -229,3 +229,29 @@ def archive_plant(plant_id: int, db: Session = Depends(get_db)):
     plant.active = False
     db.commit()
     return {"id": plant.id, "active": False, "message": "Plant archived successfully."}
+
+
+@router.get("/audit-logs")
+def get_audit_logs(db: Session = Depends(get_db)):
+    """Return the last 10 system audit log entries (most recent first)."""
+    from backend.app.models.garden import SystemAuditLog
+
+    logs = (
+        db.query(SystemAuditLog)
+        .order_by(SystemAuditLog.timestamp.desc())
+        .limit(10)
+        .all()
+    )
+    return {
+        "audit_logs": [
+            {
+                "id": log.id,
+                "timestamp": log.timestamp.isoformat() if log.timestamp else None,
+                "trigger_type": log.trigger_type,
+                "action": log.action,
+                "details": log.details,
+                "status": log.status,
+            }
+            for log in logs
+        ]
+    }

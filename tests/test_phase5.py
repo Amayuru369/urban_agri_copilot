@@ -84,21 +84,26 @@ def test_dashboard_returns_plants_with_days_active(monkeypatch):
     """GET /api/garden/dashboard should return active plants with computed days_active."""
 
     # Monkeypatch weather fetch to avoid real API calls
-    async def fake_fetch_weather_risk(lat, lon):
-        return {
+    async def fake_fetch_weather_risk_batch(coords_list):
+        normal = {
             "heavy_rain": False,
             "extreme_heat": False,
+            "extreme_cold": False,
+            "high_wind": False,
             "precipitation_mm": 2.0,
             "max_temp_c": 31.0,
+            "min_temp_c": 24.0,
+            "wind_gusts_kmh": 10.0,
             "description": "Conditions normal",
         }
+        return {coord: normal for coord in coords_list}
 
     monkeypatch.setattr(
-        "backend.app.services.garden_monitor.fetch_weather_risk",
-        fake_fetch_weather_risk,
+        "backend.app.services.garden_monitor.fetch_weather_risk_batch",
+        fake_fetch_weather_risk_batch,
     )
 
-    response = client.get("/api/garden/dashboard")
+    response = client.get("/api/garden/dashboard?refresh=true")
     assert response.status_code == 200
     data = response.json()
     assert "plants" in data
@@ -119,21 +124,26 @@ def test_dashboard_returns_plants_with_days_active(monkeypatch):
 def test_milestone_alert_generated(monkeypatch):
     """Dashboard evaluation should generate milestone alerts for plants near a target day."""
 
-    async def fake_fetch_weather_risk(lat, lon):
-        return {
+    async def fake_fetch_weather_risk_batch(coords_list):
+        normal = {
             "heavy_rain": False,
             "extreme_heat": False,
+            "extreme_cold": False,
+            "high_wind": False,
             "precipitation_mm": 0.0,
             "max_temp_c": 30.0,
+            "min_temp_c": 23.0,
+            "wind_gusts_kmh": 8.0,
             "description": "Conditions normal",
         }
+        return {coord: normal for coord in coords_list}
 
     monkeypatch.setattr(
-        "backend.app.services.garden_monitor.fetch_weather_risk",
-        fake_fetch_weather_risk,
+        "backend.app.services.garden_monitor.fetch_weather_risk_batch",
+        fake_fetch_weather_risk_batch,
     )
 
-    response = client.get("/api/garden/dashboard")
+    response = client.get("/api/garden/dashboard?refresh=true")
     assert response.status_code == 200
     data = response.json()
 
@@ -150,21 +160,26 @@ def test_milestone_alert_generated(monkeypatch):
 def test_weather_alert_generated(monkeypatch):
     """Dashboard should generate weather alerts when conditions are extreme."""
 
-    async def fake_fetch_weather_risk_rainy(lat, lon):
-        return {
+    async def fake_fetch_weather_risk_batch_rainy(coords_list):
+        rainy = {
             "heavy_rain": True,
             "extreme_heat": False,
+            "extreme_cold": False,
+            "high_wind": False,
             "precipitation_mm": 35.0,
             "max_temp_c": 28.0,
+            "min_temp_c": 22.0,
+            "wind_gusts_kmh": 12.0,
             "description": "Heavy rain (35mm expected)",
         }
+        return {coord: rainy for coord in coords_list}
 
     monkeypatch.setattr(
-        "backend.app.services.garden_monitor.fetch_weather_risk",
-        fake_fetch_weather_risk_rainy,
+        "backend.app.services.garden_monitor.fetch_weather_risk_batch",
+        fake_fetch_weather_risk_batch_rainy,
     )
 
-    response = client.get("/api/garden/dashboard")
+    response = client.get("/api/garden/dashboard?refresh=true")
     assert response.status_code == 200
     data = response.json()
 
@@ -181,22 +196,27 @@ def test_weather_alert_generated(monkeypatch):
 def test_resolve_alert(monkeypatch):
     """PATCH /api/garden/alerts/{id}/resolve should mark an alert as resolved."""
 
-    async def fake_fetch_weather_risk(lat, lon):
-        return {
+    async def fake_fetch_weather_risk_batch(coords_list):
+        normal = {
             "heavy_rain": False,
             "extreme_heat": False,
+            "extreme_cold": False,
+            "high_wind": False,
             "precipitation_mm": 1.0,
             "max_temp_c": 30.0,
+            "min_temp_c": 23.0,
+            "wind_gusts_kmh": 9.0,
             "description": "Conditions normal",
         }
+        return {coord: normal for coord in coords_list}
 
     monkeypatch.setattr(
-        "backend.app.services.garden_monitor.fetch_weather_risk",
-        fake_fetch_weather_risk,
+        "backend.app.services.garden_monitor.fetch_weather_risk_batch",
+        fake_fetch_weather_risk_batch,
     )
 
     # Get an unresolved alert ID
-    response = client.get("/api/garden/dashboard")
+    response = client.get("/api/garden/dashboard?refresh=true")
     data = response.json()
     alert_id = None
     for plant in data["plants"]:
@@ -223,27 +243,32 @@ def test_resolve_nonexistent_alert():
 def test_no_duplicate_alerts_same_day(monkeypatch):
     """Running dashboard evaluation twice on the same day should not duplicate alerts."""
 
-    async def fake_fetch_weather_risk(lat, lon):
-        return {
+    async def fake_fetch_weather_risk_batch(coords_list):
+        rainy = {
             "heavy_rain": True,
             "extreme_heat": False,
+            "extreme_cold": False,
+            "high_wind": False,
             "precipitation_mm": 25.0,
             "max_temp_c": 29.0,
+            "min_temp_c": 23.0,
+            "wind_gusts_kmh": 15.0,
             "description": "Heavy rain (25mm expected)",
         }
+        return {coord: rainy for coord in coords_list}
 
     monkeypatch.setattr(
-        "backend.app.services.garden_monitor.fetch_weather_risk",
-        fake_fetch_weather_risk,
+        "backend.app.services.garden_monitor.fetch_weather_risk_batch",
+        fake_fetch_weather_risk_batch,
     )
 
     # First call
-    r1 = client.get("/api/garden/dashboard")
+    r1 = client.get("/api/garden/dashboard?refresh=true")
     assert r1.status_code == 200
     data1 = r1.json()
 
     # Second call (same day)
-    r2 = client.get("/api/garden/dashboard")
+    r2 = client.get("/api/garden/dashboard?refresh=true")
     assert r2.status_code == 200
     data2 = r2.json()
 
