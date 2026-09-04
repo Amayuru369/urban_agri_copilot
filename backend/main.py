@@ -20,6 +20,7 @@ from backend.app.services.garden_monitor import (
     send_daily_morning_digest,
     send_telegram_alert,
 )
+from backend.app.services.digest_service import send_morning_garden_digest
 from backend.seed_data import seed_all
 
 scheduler = AsyncIOScheduler()
@@ -90,9 +91,9 @@ async def lifespan(app: FastAPI):
     if chat_id:
         startup_msg = (
             "🚀 <b>UrbanAgri-Copilot Online</b>\n\n"
-            "• <b>Status:</b> System initialized & running\n"
+            "• <b>Status:</b> System initialized & monitoring active\n"
             "• <b>Daily Scan:</b> Scheduled for 06:00 AM\n"
-            "• <b>Audit Log:</b> STARTUP check in progress"
+            "• <b>Morning Digest:</b> Scheduled for 07:00 AM"
         )
         await send_telegram_alert(chat_id, startup_msg)
 
@@ -106,6 +107,15 @@ async def lifespan(app: FastAPI):
         id="garden_monitor_daily",
         replace_existing=True,
     )
+
+    # 4. Send the Daily Morning Garden Digest at 07:00 AM server time
+    scheduler.add_job(
+        send_morning_garden_digest,
+        trigger=CronTrigger(hour=7, minute=0),
+        id="daily_morning_digest",
+        replace_existing=True,
+    )
+
     scheduler.start()
 
     yield
@@ -139,6 +149,16 @@ app.include_router(report.router, prefix="/api")
 app.include_router(garden.router, prefix="/api")
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 
+@app.get("/api/scheduler/jobs")
+def get_scheduled_jobs():
+    return [
+        {
+            "id": job.id,
+            "trigger": str(job.trigger),
+            "next_run_time": str(job.next_run_time),
+        }
+        for job in scheduler.get_jobs()
+    ]
 
 @app.get("/api/health")
 async def health_check():

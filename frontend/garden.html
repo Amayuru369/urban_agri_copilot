@@ -94,6 +94,12 @@
           </select>
           <input id="custom_crop" type="text" placeholder="Enter crop name" class="hidden mt-2 w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500" />
         </div>
+
+        <div>
+          <label for="plant_label" class="block text-xs font-medium text-gray-600 mb-1">Plant Note / Identifier <span class="text-gray-400">(optional)</span></label>
+          <input id="plant_label" type="text" placeholder="e.g. Pot A, Bed 2, Balcony" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+        </div>
+
         <div>
           <label for="pot_size_liters" class="block text-xs font-medium text-gray-600 mb-1">Pot Size (liters)</label>
           <input id="pot_size_liters" type="number" min="0.5" max="200" step="0.5" value="15" required class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
@@ -107,7 +113,13 @@
           <input id="telegram_chat_id" type="text" placeholder="e.g. 123456789" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
         </div>
         <div>
-          <label for="location_name" class="block text-xs font-medium text-gray-600 mb-1">Location Label</label>
+          <label for="plot_select" class="block text-xs font-medium text-gray-600 mb-1">Saved Location</label>
+          <select id="plot_select" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+            <option value="new">+ Add New Location</option>
+          </select>
+        </div>
+        <div>
+          <label for="location_name" class="block text-xs font-medium text-gray-600 mb-1">Location Name</label>
           <input id="location_name" type="text" placeholder="e.g. Back Garden or Colombo" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
         </div>
 
@@ -303,6 +315,17 @@ const CROP_EMOJI = {
   'Gotukola': '🥬',
 };
 
+function getCropEmoji(cropName) {
+  if (!cropName) return '🌿';
+  const lower = cropName.toLowerCase();
+  for (const [crop, emoji] of Object.entries(CROP_EMOJI)) {
+    if (lower.includes(crop.toLowerCase())) {
+      return emoji;
+    }
+  }
+  return '🌿';
+}
+
 const defaultCoords = [DEFAULT_LAT, DEFAULT_LON];
 const map = L.map('map').setView(defaultCoords, 10);
 
@@ -353,6 +376,60 @@ function handleManualCoords() {
     updateLocation(lat, lon, true);
   }
 }
+
+// Populate Saved Locations Dropdown
+async function loadSavedGardenPlots() {
+  try {
+    const res = await apiFetch(`${API_BASE}/locations`);
+    const plots = await res.json();
+    const select = document.getElementById('plot_select');
+    if (!select) return;
+
+    select.innerHTML = '<option value="new">+ Add New Location</option>';
+    plots.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify(p);
+      opt.textContent = `${p.location_name} (${p.latitude.toFixed(2)}, ${p.longitude.toFixed(2)})`;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.warn("Failed to load saved locations:", err);
+  }
+}
+
+document.getElementById('plot_select').addEventListener('change', (e) => {
+  const locInput = document.getElementById('location_name');
+  const latField = document.getElementById('latitude');
+  const lonField = document.getElementById('longitude');
+
+  if (e.target.value === 'new') {
+    // Re-enable editing for a new location
+    locInput.value = '';
+    locInput.readOnly = false;
+    locInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+
+    latField.readOnly = false;
+    lonField.readOnly = false;
+    latField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+    lonField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+
+    updateLocation(DEFAULT_LAT, DEFAULT_LON, true);
+  } else {
+    // Auto-fill and lock fields so existing plot data cannot be modified
+    const plot = JSON.parse(e.target.value);
+    
+    locInput.value = plot.location_name;
+    locInput.readOnly = true;
+    locInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+
+    latField.readOnly = true;
+    lonField.readOnly = true;
+    latField.classList.add('bg-gray-100', 'cursor-not-allowed');
+    lonField.classList.add('bg-gray-100', 'cursor-not-allowed');
+
+    updateLocation(plot.latitude, plot.longitude, true);
+  }
+});
 
 latInput.addEventListener('input', handleManualCoords);
 lonInput.addEventListener('input', handleManualCoords);
@@ -544,7 +621,7 @@ function appendPlantPlaceholder(cropName, locationName) {
 }
 
 function buildPlantCard(plant) {
-  const emoji = CROP_EMOJI[plant.crop_name] || '🌿';
+  const emoji = getCropEmoji(plant.crop_name);
   const pct = Math.min(100, Math.max(0, plant.progress_pct || 0));
   const alerts = plant.unresolved_alerts || [];
   const alertCount = alerts.length;
@@ -684,9 +761,12 @@ document.getElementById('plant-form').addEventListener('submit', async (e) => {
   const status = document.getElementById('form-status');
 
   const cropNameInput = document.getElementById('crop_name').value;
-  const cropName = cropNameInput === '__custom__'
-    ? document.getElementById('custom_crop').value
+  let baseName = cropNameInput === '__custom__'
+    ? document.getElementById('custom_crop').value.trim()
     : cropNameInput;
+
+  const noteVal = document.getElementById('plant_label').value.trim();
+  const cropName = noteVal ? `${baseName} (${noteVal})` : baseName;
   const locationName = document.getElementById('location_name').value;
 
   const latRaw = parseFloat(document.getElementById('latitude').value);
@@ -723,10 +803,19 @@ document.getElementById('plant-form').addEventListener('submit', async (e) => {
 
     appendPlantPlaceholder(data.crop_name, locationName);
 
+    // Clear form inputs after registration
     document.getElementById('telegram_chat_id').value = '';
-    document.getElementById('location_name').value = '';
+    document.getElementById('plant_label').value = '';
+    
+    // Reset dropdown to "+ Add New Location" and trigger change to unlock inputs
+    const plotSelect = document.getElementById('plot_select');
+    if (plotSelect) {
+      plotSelect.value = 'new';
+      plotSelect.dispatchEvent(new Event('change'));
+    }
 
     await loadDashboard(true);
+    await loadSavedGardenPlots(); 
 
   } catch (err) {
     status.textContent = `✗ ${err.message}`;
@@ -926,6 +1015,7 @@ function formatTimestamp(iso) {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('planted_date').value = today;
   updateLocation(DEFAULT_LAT, DEFAULT_LON, true);
+  loadSavedGardenPlots();
   loadDashboard();
   loadAuditLogs();
 })();

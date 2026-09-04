@@ -340,7 +340,13 @@ async def evaluate_garden_state(db: Session) -> int:
         days_active = (today - plant.planted_date).days
 
         # --- Milestone Check ---
-        schedule = MILESTONE_SCHEDULE.get(plant.crop_name, _DEFAULT_MILESTONES)
+        crop_lower = plant.crop_name.lower()
+        schedule = _DEFAULT_MILESTONES
+        for standard_crop, sched in MILESTONE_SCHEDULE.items():
+            if standard_crop.lower() in crop_lower:
+                schedule = sched
+                break
+
         for milestone in schedule:
             target_day = milestone["day"]
             if abs(days_active - target_day) <= 2:
@@ -381,7 +387,7 @@ async def evaluate_garden_state(db: Session) -> int:
                             f"<b>{milestone['label']}</b>\n"
                             f"👉 {milestone['action']}"
                         )
-                        asyncio.create_task(send_telegram_alert(target_chat, tg_text))
+                        await send_telegram_alert(target_chat, tg_text)
                 break
 
         # --- Weather Risk Check ---
@@ -467,7 +473,7 @@ async def evaluate_garden_state(db: Session) -> int:
                         f"{weather_risk['description']}\n"
                         f"👉 {action}"
                     )
-                    asyncio.create_task(send_telegram_alert(target_chat, tg_text))
+                    await send_telegram_alert(target_chat, tg_text)
 
     db.commit()
     logger.info("[Garden Monitor] Evaluation complete. %d new alert(s) generated.", new_alert_count)

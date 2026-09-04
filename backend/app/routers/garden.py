@@ -117,7 +117,12 @@ async def get_dashboard(refresh: bool = False, db: Session = Depends(get_db)):
             days_active = 0
 
         # Calculate progress percentage based on expected harvest timeline
-        schedule = MILESTONE_SCHEDULE.get(plant.crop_name, _DEFAULT_MILESTONES)
+        crop_lower = plant.crop_name.lower()
+        schedule = _DEFAULT_MILESTONES
+        for standard_crop, sched in MILESTONE_SCHEDULE.items():
+            if standard_crop.lower() in crop_lower:
+                schedule = sched
+                break
         max_day = schedule[-1]["day"] if schedule else 90
         progress_pct = min(100.0, round((days_active / max_day) * 100, 1))
 
@@ -256,3 +261,30 @@ def get_audit_logs(db: Session = Depends(get_db)):
             for log in logs
         ]
     }
+
+@router.get("/locations")
+def get_saved_locations(db: Session = Depends(get_db)):
+    """Fetch unique active garden plots to populate the UI dropdown."""
+    plants = (
+        db.query(TrackedPlant.location_name, TrackedPlant.latitude, TrackedPlant.longitude)
+        .filter(TrackedPlant.active == True)
+        .all()
+    )
+
+    seen = set()
+    locations = []
+    for loc_name, lat, lon in plants:
+        name = (loc_name or "Home Garden").strip()
+        safe_lat = round(float(lat if lat is not None else 6.9271), 4)
+        safe_lon = round(float(lon if lon is not None else 79.8612), 4)
+
+        key = (name.lower(), round(safe_lat, 2), round(safe_lon, 2))
+        if key not in seen:
+            seen.add(key)
+            locations.append({
+                "location_name": name,
+                "latitude": safe_lat,
+                "longitude": safe_lon,
+            })
+
+    return locations
