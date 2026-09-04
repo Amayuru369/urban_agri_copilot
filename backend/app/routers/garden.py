@@ -101,7 +101,8 @@ async def create_plant(payload: PlantCreate, db: Session = Depends(get_db)):
 async def get_dashboard(refresh: bool = False, db: Session = Depends(get_db)):
     """Return dashboard state. Only evaluates live weather when refresh=True."""
     if refresh:
-        await evaluate_garden_state(db)
+        from backend.main import _run_garden_monitor
+        await _run_garden_monitor(trigger_type="MANUAL")
 
     today = date.today()
     plants = db.query(TrackedPlant).filter(TrackedPlant.active == True).all()  # noqa: E712

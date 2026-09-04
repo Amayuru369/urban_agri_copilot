@@ -225,7 +225,7 @@ async def send_telegram_alert(chat_id: str, text: str) -> bool:
         return False
 
     if not chat_id:
-        chat_id = getattr(settings, "TELEGRAM_CHAT_ID", None)
+        chat_id = getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None) or getattr(settings, "TELEGRAM_CHAT_ID", None)
         
     if not chat_id:
         logger.debug("[Garden Monitor] No Telegram Chat ID provided or found in settings; skipping.")
@@ -240,21 +240,25 @@ async def send_telegram_alert(chat_id: str, text: str) -> bool:
     }
 
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(url, json=payload)
             if response.status_code == 200:
                 return True
             logger.warning(
                 "[Garden Monitor] Telegram send failed (HTTP %d): %s",
                 response.status_code,
-                response.text[:200],
+                response.text,
             )
     except Exception as e:
-        logger.warning("[Garden Monitor] Telegram send error for chat %s: %s", chat_id, e)
+        resp_text = getattr(getattr(e, "response", None), "text", repr(e))
+        logger.warning(
+            "[Garden Monitor] Telegram send error for chat %s: %s (%s)",
+            chat_id,
+            resp_text,
+            type(e).__name__,
+        )
 
     return False
-
-
 # ---------------------------------------------------------------------------
 # Daily Morning Digest
 # ---------------------------------------------------------------------------
