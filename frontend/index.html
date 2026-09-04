@@ -17,9 +17,37 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen">
   <header class="bg-green-900 text-white shadow">
-    <div class="max-w-6xl mx-auto px-4 py-5">
-      <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">UrbanAgri-Copilot</h1>
-      <p class="text-green-100 text-sm mt-1">Smart planning, diagnosis, and harvest economics for Sri Lankan urban growers</p>
+    <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">UrbanAgri-Copilot</h1>
+        <p class="text-green-100 text-sm mt-1">Smart planning, diagnosis, and harvest economics for Sri Lankan urban growers</p>
+      </div>
+
+      <!-- Auth state container (mirrors garden.html). Populated by JS below. -->
+      <div id="auth-container" class="flex items-center gap-2 shrink-0">
+        <!-- Signed-out fallback (replaced by JS when a token is present) -->
+        <a id="signin-btn"
+           href="/login.html"
+           class="inline-flex items-center gap-1.5 text-xs font-semibold bg-white text-green-900 hover:bg-green-50 border border-green-100 px-3 py-2 rounded-md transition">
+          Sign In
+        </a>
+
+        <!-- Signed-in badge (hidden until JS confirms a session) -->
+        <div id="auth-badge" class="hidden items-center gap-2">
+          <div class="text-right leading-tight pl-2 border-l border-green-700/60">
+            <p id="auth-badge-name" class="text-xs font-semibold text-white max-w-[160px] truncate">—</p>
+            <p id="auth-badge-role" class="text-[10px] font-bold uppercase tracking-wider text-green-200">—</p>
+          </div>
+          <button id="auth-settings-btn" type="button" title="Profile settings"
+                  class="text-xs font-medium text-green-100 hover:text-white bg-green-800 hover:bg-green-700 border border-green-700 px-2.5 py-1.5 rounded-md transition flex items-center gap-1">
+            <span>⚙️</span><span class="hidden sm:inline">Settings</span>
+          </button>
+          <button id="auth-logout-btn" type="button" title="Sign out"
+                  class="text-xs font-medium text-green-100 hover:text-white bg-green-800 hover:bg-red-700 border border-green-700 hover:border-red-600 px-2.5 py-1.5 rounded-md transition">
+            Logout
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -34,6 +62,12 @@
       <button data-tab="economics" class="tab-btn flex-1 px-4 py-3 text-sm md:text-base text-gray-600 hover:bg-gray-50 whitespace-nowrap">
         Harvest Economics &amp; PDF Export
       </button>
+      <!-- Cross-page navigation (does NOT participate in the tab system) -->
+      <a href="/garden.html"
+         class="shrink-0 inline-flex items-center gap-1.5 px-4 py-3 text-sm md:text-base font-semibold text-green-800 bg-green-50 hover:bg-green-100 border-l border-green-200 whitespace-nowrap transition"
+         title="Open the Plant Monitor & Garden dashboard">
+        🌱 Plant Monitor &amp; Garden
+      </a>
     </nav>
 
     <!-- Planner Tab -->
@@ -312,6 +346,10 @@
 
     <div id="status-message" class="hidden fixed bottom-4 right-4 max-w-sm bg-gray-900 text-white text-sm px-4 py-3 rounded-md shadow-lg"></div>
   </main>
+
+  <!-- Shared auth helpers (getAuthToken, clearAuthToken, decodeTokenPayload,
+       redirectToLogin, logoutAndRedirect, fetchCurrentUser, isAdminUser) -->
+  <script src="/auth.js"></script>
 
   <script>
     const tabs = document.querySelectorAll('.tab-btn');
@@ -1133,6 +1171,57 @@
 
     loadCrops();
     loadMarketPrices();
+  </script>
+
+  <!-- Auth UI wiring: mirrors garden.html's user badge using shared auth.js -->
+  <script>
+    (function initAuthHeader() {
+      const signInBtn = document.getElementById('signin-btn');
+      const badge = document.getElementById('auth-badge');
+      const nameEl = document.getElementById('auth-badge-name');
+      const roleEl = document.getElementById('auth-badge-role');
+      const settingsBtn = document.getElementById('auth-settings-btn');
+      const logoutBtn = document.getElementById('auth-logout-btn');
+
+      // No token → keep the "Sign In" button visible and stop here.
+      if (!getAuthToken()) {
+        if (signInBtn) signInBtn.classList.remove('hidden');
+        if (badge) badge.classList.add('hidden');
+        return;
+      }
+
+      // Token present → hide Sign In, show the badge, resolve the profile.
+      if (signInBtn) signInBtn.classList.add('hidden');
+      if (badge) { badge.classList.remove('hidden'); badge.classList.add('flex'); }
+
+      // Optimistic render from token claims so the header paints instantly;
+      // the network refresh below overwrites it with authoritative data.
+      const claims = decodeTokenPayload(getAuthToken());
+      if (claims) {
+        if (nameEl) nameEl.textContent = claims.name || 'Signed in';
+        if (roleEl) roleEl.textContent = claims.is_admin ? 'ADMIN' : 'GROWER';
+      }
+
+      // Authoritative profile fetch (handles 401 by bouncing to /login.html).
+      fetchCurrentUser().then(user => {
+        if (!user) return; // fetchCurrentUser already redirected on 401
+        if (nameEl) nameEl.textContent = user.name || 'Signed in';
+        if (roleEl) roleEl.textContent = user.is_admin ? 'ADMIN' : 'GROWER';
+      });
+
+      // Settings deep-links into the garden dashboard's profile modal, which
+      // already handles both admin and grower roles.
+      if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+          window.location.href = '/garden.html#settings';
+        });
+      }
+
+      // Logout clears the token (and any admin scope) and returns to /login.html.
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => { logoutAndRedirect(); });
+      }
+    })();
   </script>
 </body>
 </html>

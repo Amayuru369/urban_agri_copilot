@@ -8,6 +8,41 @@ from sqlalchemy.orm import relationship
 from backend.app.core.database import Base
 
 
+class User(Base):
+    """A judge / gardener profile that can own multiple plants and locations."""
+
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    telegram_chat_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Authentication (nullable to preserve legacy rows created before login existed)
+    hashed_password = Column(String, nullable=True)
+    is_admin = Column(Boolean, nullable=False, default=False)
+
+    # Relationships (kept lazy to avoid unexpected joins)
+    plants = relationship("TrackedPlant", back_populates="user")
+    locations = relationship("Location", back_populates="user")
+
+
+class Location(Base):
+    """A named garden plot / balcony / rooftop location owned by a user."""
+
+    __tablename__ = "locations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    name = Column(String, nullable=False, default="Home Garden")
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="locations")
+
+
 class TrackedPlant(Base):
     """A user-registered plant being monitored for growth milestones and weather risks."""
 
@@ -23,8 +58,12 @@ class TrackedPlant(Base):
     telegram_chat_id = Column(String, nullable=True)
     active = Column(Boolean, nullable=False, default=True)
 
-    # Relationship to alerts
+    # Profile ownership (nullable for backward compatibility with pre-existing rows)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+
+    # Relationships
     alerts = relationship("PlantAlert", back_populates="plant", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="plants")
 
 
 class PlantAlert(Base):

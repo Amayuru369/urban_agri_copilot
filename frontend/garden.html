@@ -28,11 +28,34 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5">
+          <label for="profile-select" class="text-[11px] font-medium text-gray-500 hidden sm:inline">User:</label>
+          <select
+            id="profile-select"
+            class="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 max-w-[180px]"
+            title="Active user profile"
+          >
+            <option value="">🛡️ Admin (Global Overview)</option>
+            <option value="__new__">＋ New User Profile</option>
+          </select>
+        </div>
         <a href="/" class="text-xs text-green-700 hover:text-green-900 font-medium px-3 py-1.5 rounded-md border border-green-200 hover:bg-green-50 transition">← Planner</a>
         <button id="refresh-btn" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-md font-medium hover:bg-green-800 transition flex items-center gap-1">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           Refresh
         </button>
+        <div id="user-badge" class="hidden items-center gap-2 pl-3 border-l border-gray-200">
+          <div class="text-right leading-tight">
+            <p id="user-badge-name" class="text-xs font-semibold text-gray-800 max-w-[140px] truncate">—</p>
+            <p id="user-badge-role" class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">—</p>
+          </div>
+          <button id="settings-btn" title="Profile settings" class="text-xs text-gray-600 hover:text-green-700 font-medium px-2 py-1.5 rounded-md border border-gray-200 hover:bg-green-50 transition flex items-center gap-1">
+            <span>⚙️</span><span class="hidden sm:inline">Settings</span>
+          </button>
+          <button id="logout-btn" title="Sign out" class="text-xs text-gray-500 hover:text-red-600 font-medium px-2 py-1.5 rounded-md border border-gray-200 hover:bg-red-50 transition">
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -42,7 +65,9 @@
     <!-- Registration Form -->
     <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
       <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-4">🌱 Register New Plant</h2>
-      <form id="plant-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+      <form id="plant-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- Col 1: Crop Type -->
         <div>
           <label for="crop_name" class="block text-xs font-medium text-gray-600 mb-1">Crop Type</label>
           <select id="crop_name" required class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
@@ -53,14 +78,28 @@
           </select>
           <input id="custom_crop" type="text" placeholder="Enter crop name" class="hidden mt-2 w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500" />
         </div>
+<<<<<<< Updated upstream
+=======
+
+        <!-- Col 2: Plant Note -->
+        <div>
+          <label for="plant_label" class="block text-xs font-medium text-gray-600 mb-1">Plant Note / Identifier <span class="text-gray-400">(optional)</span></label>
+          <input id="plant_label" type="text" placeholder="e.g. Pot A, Bed 2, Balcony" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+        </div>
+
+        <!-- Col 3: Pot Size -->
+>>>>>>> Stashed changes
         <div>
           <label for="pot_size_liters" class="block text-xs font-medium text-gray-600 mb-1">Pot Size (liters)</label>
           <input id="pot_size_liters" type="number" min="0.5" max="200" step="0.5" value="15" required class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
         </div>
+
+        <!-- Col 4: Planted Date -->
         <div>
           <label for="planted_date" class="block text-xs font-medium text-gray-600 mb-1">Planted Date</label>
           <input id="planted_date" type="date" required class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
         </div>
+<<<<<<< Updated upstream
         <div>
           <label for="telegram_chat_id" class="block text-xs font-medium text-gray-600 mb-1">Telegram Chat ID <span class="text-gray-400">(optional)</span></label>
           <input id="telegram_chat_id" type="text" placeholder="e.g. 123456789" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
@@ -68,9 +107,38 @@
         <div>
           <label for="location_name" class="block text-xs font-medium text-gray-600 mb-1">Location Label</label>
           <input id="location_name" type="text" placeholder="e.g. Back Garden or Colombo" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+=======
+
+        <!-- Row 2: Location & Telegram Details (Spans all 4 outer columns, splits into 3) -->
+        <div class="sm:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="telegram_chat_id" class="block text-xs font-medium text-gray-600 mb-1">
+              Telegram Chat ID <span class="text-gray-400">(optional override)</span>
+            </label>
+            <input 
+              type="text" 
+              id="telegram_chat_id" 
+              name="telegram_chat_id"
+              class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="Leave blank to use profile default"
+            />
+          </div>
+
+          <div>
+            <label for="plot_select" class="block text-xs font-medium text-gray-600 mb-1">Saved Location</label>
+            <select id="plot_select" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+              <option value="new">+ Add New Location</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="location_name" class="block text-xs font-medium text-gray-600 mb-1">Location Name</label>
+            <input id="location_name" type="text" placeholder="e.g. Back Garden or Colombo" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+          </div>
+>>>>>>> Stashed changes
         </div>
 
-        <!-- Full Width Map Container -->
+        <!-- Row 3: Map Section (Spans all 4 outer columns) -->
         <div class="sm:col-span-2 lg:col-span-4 mt-2">
           <div class="mb-3">
             <label class="block text-xs font-semibold text-gray-700 mb-1.5">Garden Coordinates</label>
@@ -107,15 +175,16 @@
           <div id="map" class="h-56 w-full rounded border border-gray-200"></div>
         </div>
 
+        <!-- Row 4: Submit Button -->
         <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-3 pt-2">
           <button type="submit" id="submit-btn" class="bg-green-700 text-white text-sm font-medium px-6 py-2.5 rounded-md hover:bg-green-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
             Add Plant
           </button>
           <span id="form-status" class="text-xs text-gray-500"></span>
         </div>
+
       </form>
     </section>
-
     <!-- Stats Bar -->
     <section id="stats-bar" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
@@ -198,7 +267,217 @@
     </div>
   </div>
 
+<<<<<<< Updated upstream
+=======
+  <!-- Profile Settings & Password Reset Modal -->
+  <div id="profile-settings-modal" class="hidden fixed inset-0 z-[9998] flex items-center justify-center px-4">
+    <!-- Backdrop -->
+    <div id="profile-settings-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+    <!-- Dialog -->
+    <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200 card-enter">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div>
+          <h3 class="text-base font-bold text-gray-900">⚙️ Profile Settings</h3>
+          <p id="profile-settings-subtitle" class="text-xs text-gray-500 mt-0.5">Update your account details</p>
+        </div>
+        <button id="profile-settings-close" type="button" class="text-gray-400 hover:text-gray-700 text-xl leading-none px-1" aria-label="Close">&times;</button>
+      </div>
+
+      <form id="profile-settings-form" class="px-6 py-5 space-y-4">
+        <input type="hidden" id="ps-target-id" />
+
+        <div>
+          <label for="ps-name" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Name</label>
+          <input id="ps-name" type="text" autocomplete="off"
+            class="w-full text-sm border border-gray-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <div>
+          <label for="ps-telegram" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
+            Telegram Chat ID <span class="normal-case font-normal text-gray-400">(optional)</span>
+          </label>
+          <input id="ps-telegram" type="text" autocomplete="off" placeholder="For alert notifications"
+            class="w-full text-sm border border-gray-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <div>
+          <label for="ps-password" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
+            New Password <span class="normal-case font-normal text-gray-400">(leave blank to keep current)</span>
+          </label>
+          <input id="ps-password" type="password" autocomplete="new-password" placeholder="Min. 6 characters"
+            class="w-full text-sm border border-gray-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <!-- Feedback banner -->
+        <div id="ps-message" class="hidden text-sm rounded-lg px-3.5 py-2.5"></div>
+
+        <div class="flex items-center justify-between gap-3 pt-2">
+          <button id="ps-delete-btn" type="button"
+            class="hidden text-xs font-semibold text-red-600 hover:text-white bg-white hover:bg-red-600 border border-red-300 px-3.5 py-2.5 rounded-lg transition">
+            Delete Profile
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button id="ps-cancel-btn" type="button"
+              class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3.5 py-2.5 rounded-lg transition">
+              Cancel
+            </button>
+            <button id="ps-save-btn" type="submit"
+              class="text-xs font-semibold text-white bg-green-700 hover:bg-green-800 px-4 py-2.5 rounded-lg transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+              <span id="ps-save-label">Save Changes</span>
+              <svg id="ps-save-spinner" class="hidden animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating Chat Widget -->
+  <button id="chat-fab" class="chat-fab" title="Ask Garden Copilot" aria-label="Open garden assistant chat">
+    🌿
+  </button>
+
+  <div id="chat-drawer" class="chat-drawer">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 rounded-t-2xl bg-gradient-to-r from-emerald-50 to-green-50">
+      <div class="flex items-center gap-2">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <h3 class="text-sm font-bold text-gray-800">UrbanAgri Copilot</h3>
+      </div>
+      <button id="chat-close" class="text-gray-400 hover:text-gray-600 text-lg leading-none font-bold px-1" title="Minimize">✕</button>
+    </div>
+
+    <!-- Messages -->
+    <div id="chat-messages" class="chat-messages">
+      <div class="chat-msg assistant">Hello! I'm watching your garden. Ask me anything about your active crops, upcoming milestones, or organic remedies. 🌱</div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="chat-typing" class="typing-dots hidden" style="margin: 0 16px 8px;">
+      <span></span><span></span><span></span>
+    </div>
+
+    <!-- Input -->
+    <div class="px-3 py-3 border-t border-gray-200 rounded-b-2xl">
+      <form id="chat-form" class="flex items-center gap-2">
+        <input
+          id="chat-input"
+          type="text"
+          placeholder="Ask about your garden..."
+          autocomplete="off"
+          maxlength="500"
+          class="flex-1 text-sm border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+        />
+        <button
+          type="submit"
+          id="chat-send"
+          class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  </div>
+
+<script src="/auth.js"></script>
+>>>>>>> Stashed changes
 <script>
+
+  function maskTelegramId(id) {
+  if (!id) return '';
+  const str = String(id).trim();
+  if (str.length <= 4) return '••••';
+  return str.slice(0, 2) + '••••' + str.slice(-2);
+}
+
+// ---------------------------------------------------------------------------
+//  JWT Authentication (page-level session state; shared helpers come from
+//  /auth.js which exposes getAuthToken, clearAuthToken, decodeTokenPayload,
+//  redirectToLogin, logoutAndRedirect, fetchCurrentUser, TOKEN_STORAGE_KEY).
+// ---------------------------------------------------------------------------
+let CURRENT_USER = null; // { id, name, telegram_chat_id, is_admin }
+
+/**
+ * Gate: require a token before the dashboard renders. If missing, bounce to
+ * the login page immediately.
+ */
+function requireAuth() {
+  if (!getAuthToken()) {
+    redirectToLogin();
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Fetch the authenticated profile via the shared helper and cache it locally.
+ * Determines whether the session is an admin (global overview + profile
+ * switcher) or a regular grower (locked to their own plants).
+ */
+async function loadCurrentUser() {
+  CURRENT_USER = await fetchCurrentUser();
+  return CURRENT_USER;
+}
+
+function isAdminUser() {
+  return Boolean(CURRENT_USER && CURRENT_USER.is_admin);
+}
+
+/**
+ * Render the signed-in user's name + role chip and wire the logout button.
+ */
+function renderUserBadge() {
+  const badge = document.getElementById('user-badge');
+  const nameEl = document.getElementById('user-badge-name');
+  const roleEl = document.getElementById('user-badge-role');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  if (badge) badge.classList.remove('hidden');
+  if (badge) badge.classList.add('flex');
+
+  if (nameEl) nameEl.textContent = (CURRENT_USER && CURRENT_USER.name) ? CURRENT_USER.name : 'Signed in';
+  if (roleEl) roleEl.textContent = isAdminUser() ? 'Admin' : 'Grower';
+
+  if (logoutBtn) {
+    logoutBtn.onclick = () => { logoutAndRedirect(); };
+  }
+}
+
+/**
+ * Apply role-based UI: admins keep the profile switcher (global overview +
+ * per-grower scoping); growers have it hidden and are locked to their own id.
+ */
+function applyRoleBasedUI() {
+  const selectWrap = document.getElementById('profile-select');
+  const label = document.querySelector('label[for="profile-select"]');
+
+  if (isAdminUser()) {
+    if (selectWrap) selectWrap.classList.remove('hidden');
+    if (label) label.classList.remove('hidden');
+    return;
+  }
+
+  // Non-admin grower: hide the switcher and lock scope to their own profile.
+  if (selectWrap) selectWrap.classList.add('hidden');
+  if (label) label.classList.add('hidden');
+  if (CURRENT_USER && CURRENT_USER.id) {
+    setActiveUserId(CURRENT_USER.id);
+  }
+}
+
+// ---------------------------------------------------------------------------
+//  User Profile Switcher
+// ---------------------------------------------------------------------------
+const PROFILE_STORAGE_KEY = 'urbanagri_active_user_id';
+let USERS_CACHE = [];
+
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
@@ -286,7 +565,27 @@ function alertIcon(type) {
 // API Helpers
 // ---------------------------------------------------------------------------
 async function apiFetch(url, options = {}) {
-  const res = await fetch(url, options);
+  const headers = Object.assign({}, options.headers || {});
+
+  // Attach the JWT bearer token when present (additive — legacy header kept).
+  const token = getAuthToken();
+  if (token && !headers['Authorization']) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const activeUserId = getActiveUserId();
+  if (activeUserId) {
+    headers['X-User-Id'] = String(activeUserId);
+  }
+
+  const res = await fetch(url, Object.assign({}, options, { headers }));
+
+  // Session expired or invalid token → bounce back to the login screen.
+  if (res.status === 401) {
+    redirectToLogin();
+    throw new Error('Your session has expired. Please sign in again.');
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     let errorMsg = `HTTP ${res.status}`;
@@ -308,40 +607,50 @@ async function loadDashboard(refresh = false) {
   const grid = document.getElementById('dashboard-grid');
   const empty = document.getElementById('empty-state');
 
-  const isFirstLoad = grid.children.length === 0;
-  if (isFirstLoad) {
-    loading.classList.remove('hidden');
-    grid.innerHTML = '';
-    empty.classList.add('hidden');
+  // Only show the central full-page spinner if the dashboard has no cards yet
+  const hasExistingCards = grid && grid.children.length > 0;
+  if (!hasExistingCards) {
+    if (grid) grid.innerHTML = '';
+    if (empty) empty.classList.add('hidden');
+    if (loading) loading.classList.remove('hidden');
   }
 
   try {
     const url = refresh ? `${API_BASE}/dashboard?refresh=true` : `${API_BASE}/dashboard`;
-    const data = await (await apiFetch(url)).json();
+    const res = await apiFetch(url);
+    const data = await res.json();
     const plants = data.plants || [];
 
     const totalAlerts = plants.reduce((sum, p) => sum + (p.unresolved_alerts || []).length, 0);
     const milestones = plants.reduce((sum, p) => sum + (p.unresolved_alerts || []).filter(a => a.alert_type === 'milestone').length, 0);
     const weather = plants.reduce((sum, p) => sum + (p.unresolved_alerts || []).filter(a => a.alert_type === 'weather').length, 0);
 
-    document.getElementById('stat-plants').textContent = plants.length;
-    document.getElementById('stat-alerts').textContent = totalAlerts;
-    document.getElementById('stat-milestones').textContent = milestones;
-    document.getElementById('stat-weather').textContent = weather;
+    const statPlants = document.getElementById('stat-plants');
+    const statAlerts = document.getElementById('stat-alerts');
+    const statMilestones = document.getElementById('stat-milestones');
+    const statWeather = document.getElementById('stat-weather');
+
+    if (statPlants) statPlants.textContent = plants.length;
+    if (statAlerts) statAlerts.textContent = totalAlerts;
+    if (statMilestones) statMilestones.textContent = milestones;
+    if (statWeather) statWeather.textContent = weather;
 
     if (plants.length === 0) {
-      grid.innerHTML = '';
-      empty.classList.remove('hidden');
+      if (grid) grid.innerHTML = '';
+      if (empty) empty.classList.remove('hidden');
       return;
     }
 
-    grid.innerHTML = plants.map(plant => buildPlantCard(plant)).join('');
+    if (grid) {
+      grid.innerHTML = plants.map(plant => buildPlantCard(plant)).join('');
+    }
   } catch (err) {
-    if (isFirstLoad) {
+    console.error('Failed to load dashboard:', err);
+    if (grid && !hasExistingCards) {
       grid.innerHTML = `<div class="col-span-full text-center py-8 text-sm text-red-600">Failed to load dashboard: ${err.message}</div>`;
     }
   } finally {
-    loading.classList.add('hidden');
+    if (loading) loading.classList.add('hidden');
   }
 }
 
@@ -603,7 +912,11 @@ document.getElementById('plant-form').addEventListener('submit', async (e) => {
   const latitude = !isNaN(latRaw) ? latRaw : DEFAULT_LAT;
   const longitude = !isNaN(lonRaw) ? lonRaw : DEFAULT_LON;
 
-  const telegramVal = document.getElementById('telegram_chat_id').value.trim();
+  const telegramInput = document.getElementById('telegram_chat_id').value.trim();
+  const activeProfile = getActiveUserProfile();
+  const telegramVal = telegramInput.length > 0
+    ? telegramInput
+    : (activeProfile && activeProfile.telegram_chat_id ? activeProfile.telegram_chat_id : '');
 
   const payload = {
     crop_name: cropName,
@@ -817,14 +1130,497 @@ function formatTimestamp(iso) {
     return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   } catch { return iso; }
 }
+<<<<<<< Updated upstream
 
 (function init() {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('planted_date').value = today;
   updateLocation(DEFAULT_LAT, DEFAULT_LON, true);
   loadDashboard();
+=======
+(async function init() {
+  // 1. Auth gate — bounce to login if there is no token.
+  if (!requireAuth()) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('planted_date').value = today;
+  updateLocation(DEFAULT_LAT, DEFAULT_LON, true);
+
+  // 2. Resolve the authenticated profile, then apply role-based UI.
+  await loadCurrentUser();
+  applyRoleBasedUI();
+  renderUserBadge();
+
+  loadSavedGardenPlots();
+  await initProfileSelector();
+>>>>>>> Stashed changes
   loadAuditLogs();
+
+  // 3. Cross-page deep-link: /garden.html#settings opens the profile modal
+  //    (used by the Settings button on the planner's index.html header).
+  if (window.location.hash === '#settings') {
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+      // Small delay so USERS_CACHE + dropdown have settled for admins.
+      setTimeout(() => settingsBtn.click(), 150);
+    }
+    // Strip the hash so a manual refresh doesn't reopen the modal.
+    try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (_) { /* ignore */ }
+  }
 })();
+<<<<<<< Updated upstream
+=======
+
+
+
+function getActiveUserId() {
+  const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+  if (!raw) return null;
+  const parsed = parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function setActiveUserId(id) {
+  if (id === null || id === undefined || id === '') {
+    localStorage.removeItem(PROFILE_STORAGE_KEY);
+  } else {
+    localStorage.setItem(PROFILE_STORAGE_KEY, String(id));
+  }
+}
+
+function getActiveUserProfile() {
+  const id = getActiveUserId();
+  if (!id) return null;
+  return USERS_CACHE.find(u => u.id === id) || null;
+}
+
+async function loadUsers() {
+  // Non-admin growers are locked to their own profile — no need to enumerate users.
+  if (!isAdminUser()) {
+    USERS_CACHE = [];
+    renderProfileDropdown();
+    return;
+  }
+  try {
+    const res = await apiFetch('/api/users');
+    USERS_CACHE = await res.json();
+  } catch (err) {
+    console.warn('Failed to load user profiles:', err);
+    USERS_CACHE = [];
+  }
+  renderProfileDropdown();
+}
+
+function renderProfileDropdown() {
+  const select = document.getElementById('profile-select');
+  if (!select) {
+    console.warn('[ProfileDropdown] Element #profile-select not found in DOM!');
+    return;
+  }
+
+  const currentId = getActiveUserId();
+  const currentStr = (currentId !== null && currentId !== undefined) ? String(currentId) : '';
+
+  let html = '<option value="">🛡️ Admin (Global Overview)</option>';
+
+  USERS_CACHE.forEach(user => {
+    const isSelected = String(user.id) === currentStr ? 'selected' : '';
+    const badge = user.telegram_chat_id ? ` · 📬 ${maskTelegramId(user.telegram_chat_id)}` : '';
+    html += `<option value="${user.id}" ${isSelected}>${user.name}${badge}</option>`;
+  });
+
+  html += '<option value="__new__">＋ Add Grower Profile...</option>';
+
+  select.innerHTML = html;
+  select.value = currentStr;
+
+  // Use direct property assignment so it always replaces any existing handler
+  select.onchange = handleProfileChange;
+
+  autoFillTelegramFromProfile();
+}
+
+async function promptCreateGrowerProfile() {
+  const name = (prompt('Grower profile name (e.g., Balcony Garden, John Doe):') || '').trim();
+  if (!name) return null;
+
+  const rawChat = (prompt('Telegram chat ID for alert notifications (optional, leave blank to skip):') || '').trim();
+
+  try {
+    const res = await apiFetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        telegram_chat_id: rawChat || null,
+        // Admin-created growers get a default password so the profile can sign
+        // in. The backend bcrypt-hashes it before storing.
+        password: 'grower123',
+      }),
+    });
+    return await res.json();
+  } catch (err) {
+    alert('Failed to create user profile: ' + err.message);
+    return null;
+  }
+}
+
+async function handleProfileChange(event) {
+  const value = event.target.value;
+
+  if (value === '__new__') {
+    const created = await promptCreateGrowerProfile();
+    if (created) {
+      await loadUsers();
+      setActiveUserId(created.id);
+      const select = document.getElementById('profile-select');
+      if (select) select.value = String(created.id);
+      autoFillTelegramFromProfile();
+      await loadSavedGardenPlots();
+      await loadDashboard(false);
+    } else {
+      const prev = getActiveUserId();
+      event.target.value = prev ? String(prev) : '';
+    }
+    return;
+  }
+
+  // Parse ID: empty string or "__all__" becomes null (Admin mode)
+  const nextId = (value && value !== '__all__') ? parseInt(value, 10) : null;
+
+  // 1. Commit new user immediately
+  setActiveUserId(nextId);
+
+  // 2. Clear old plant cards and stat counters immediately
+  const grid = document.getElementById('dashboard-grid');
+  if (grid) grid.innerHTML = '';
+
+  const statPlants = document.getElementById('stat-plants');
+  if (statPlants) statPlants.textContent = '...';
+
+  // 3. Update placeholder and saved garden plots dropdown
+  autoFillTelegramFromProfile();
+  await loadSavedGardenPlots();
+
+  // 4. Re-render dashboard for the new user scope
+  await loadDashboard(false);
+}
+
+function autoFillTelegramFromProfile() {
+  const chatInput = document.getElementById('telegram_chat_id');
+  if (!chatInput) return;
+
+  const activeId = getActiveUserId();
+  const activeUser = USERS_CACHE.find(u => String(u.id) === String(activeId));
+
+  if (activeUser && activeUser.telegram_chat_id) {
+    // Uses the clean midline dots (e.g., 79····04)
+    chatInput.placeholder = `Default: ${maskTelegramId(activeUser.telegram_chat_id)} (leave blank to use)`;
+    chatInput.value = ''; 
+  } else {
+    chatInput.placeholder = 'Leave blank to use profile default';
+    chatInput.value = '';
+  }
+}
+async function initProfileSelector() {
+  await loadUsers();
+  autoFillTelegramFromProfile();
+  await loadDashboard(false);
+}
+// ---------------------------------------------------------------------------
+// Garden Assistant Chatbot Widget
+// ---------------------------------------------------------------------------
+(function initChat() {
+  const fab = document.getElementById('chat-fab');
+  const drawer = document.getElementById('chat-drawer');
+  const closeBtn = document.getElementById('chat-close');
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('chat-send');
+  const messagesEl = document.getElementById('chat-messages');
+  const typingEl = document.getElementById('chat-typing');
+
+  let isOpen = false;
+  let isWaiting = false;
+  const history = []; // In-memory conversation turns [{role, content}]
+
+  function toggleChat() {
+    isOpen = !isOpen;
+    drawer.classList.toggle('visible', isOpen);
+    fab.classList.toggle('open', isOpen);
+    fab.textContent = isOpen ? '✕' : '🌿';
+    if (isOpen) input.focus();
+  }
+
+  fab.addEventListener('click', toggleChat);
+  closeBtn.addEventListener('click', toggleChat);
+
+  function appendMessage(role, text) {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-msg ${role}`;
+    bubble.textContent = text;
+    messagesEl.appendChild(bubble);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function showTyping() { typingEl.classList.remove('hidden'); messagesEl.scrollTop = messagesEl.scrollHeight; }
+  function hideTyping() { typingEl.classList.add('hidden'); }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || isWaiting) return;
+
+    // Show user message
+    appendMessage('user', text);
+    history.push({ role: 'user', content: text });
+    input.value = '';
+
+    // Disable input while waiting
+    isWaiting = true;
+    sendBtn.disabled = true;
+    input.disabled = true;
+    showTyping();
+
+    try {
+      const chatHeaders = { 'Content-Type': 'application/json' };
+      const chatToken = getAuthToken();
+      if (chatToken) chatHeaders['Authorization'] = `Bearer ${chatToken}`;
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: chatHeaders,
+        body: JSON.stringify({
+          message: text,
+          history: history.slice(0, -1), // exclude current message (backend appends it)
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const reply = data.reply || "I couldn't generate a response. Please try again.";
+      hideTyping();
+      appendMessage('assistant', reply);
+      history.push({ role: 'assistant', content: reply });
+
+    } catch (err) {
+      hideTyping();
+      appendMessage('assistant', `⚠️ Sorry, something went wrong: ${err.message}. Please try again.`);
+    } finally {
+      isWaiting = false;
+      sendBtn.disabled = false;
+      input.disabled = false;
+      input.focus();
+    }
+  });
+})();
+
+// ---------------------------------------------------------------------------
+// Profile Settings & Password Reset Modal
+// ---------------------------------------------------------------------------
+(function initProfileSettings() {
+  const modal = document.getElementById('profile-settings-modal');
+  const backdrop = document.getElementById('profile-settings-backdrop');
+  const closeBtn = document.getElementById('profile-settings-close');
+  const cancelBtn = document.getElementById('ps-cancel-btn');
+  const form = document.getElementById('profile-settings-form');
+  const saveBtn = document.getElementById('ps-save-btn');
+  const saveLabel = document.getElementById('ps-save-label');
+  const saveSpinner = document.getElementById('ps-save-spinner');
+  const deleteBtn = document.getElementById('ps-delete-btn');
+  const subtitle = document.getElementById('profile-settings-subtitle');
+
+  const targetInput = document.getElementById('ps-target-id');
+  const nameInput = document.getElementById('ps-name');
+  const telegramInput = document.getElementById('ps-telegram');
+  const passwordInput = document.getElementById('ps-password');
+  const messageEl = document.getElementById('ps-message');
+
+  if (!modal || !form) return; // Defensive: markup missing
+
+  function showMessage(text, type) {
+    messageEl.textContent = text;
+    const base = 'text-sm rounded-lg px-3.5 py-2.5 ';
+    messageEl.className = base + (type === 'error'
+      ? 'text-red-700 bg-red-50 border border-red-200'
+      : 'text-green-700 bg-green-50 border border-green-200');
+  }
+
+  function clearMessage() {
+    messageEl.textContent = '';
+    messageEl.className = 'hidden text-sm rounded-lg px-3.5 py-2.5';
+  }
+
+  function setSaving(isSaving) {
+    saveBtn.disabled = isSaving;
+    saveLabel.textContent = isSaving ? 'Saving…' : 'Save Changes';
+    saveSpinner.classList.toggle('hidden', !isSaving);
+  }
+
+  function getSelectedProfileId() {
+    const select = document.getElementById('profile-select');
+    if (!select) return null;
+    const val = select.value;
+    if (!val || val === '__new__' || val === '__all__') return null;
+    const parsed = parseInt(val, 10);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function closeProfileSettings() {
+    modal.classList.add('hidden');
+    clearMessage();
+    passwordInput.value = '';
+  }
+
+  function openProfileSettings() {
+    if (!CURRENT_USER || !CURRENT_USER.id) {
+      alert('Your session is not ready yet. Please try again in a moment.');
+      return;
+    }
+
+    let targetId, targetData, canDelete;
+
+    if (isAdminUser()) {
+      // Admin edits whichever grower is selected in the dropdown; when the
+      // Global Overview is active (no specific user), edit their own profile.
+      const selectedId = getSelectedProfileId();
+      targetId = (selectedId !== null) ? selectedId : CURRENT_USER.id;
+      canDelete = true;
+      targetData = USERS_CACHE.find(u => u.id === targetId)
+        || (targetId === CURRENT_USER.id ? CURRENT_USER : null);
+    } else {
+      // Regular grower — always their own profile, no delete capability.
+      targetId = CURRENT_USER.id;
+      canDelete = false;
+      targetData = CURRENT_USER;
+    }
+
+    if (!targetData) {
+      alert('Could not load that profile. Please refresh and try again.');
+      return;
+    }
+
+    targetInput.value = String(targetId);
+    nameInput.value = targetData.name || '';
+    telegramInput.value = targetData.telegram_chat_id || '';
+    passwordInput.value = '';
+    clearMessage();
+
+    subtitle.textContent = (targetId === CURRENT_USER.id)
+      ? 'Update your account details'
+      : `Editing profile: ${targetData.name || '#' + targetId}`;
+
+    // Show the delete button only for admins (per role-based trigger logic).
+    if (canDelete) {
+      deleteBtn.classList.remove('hidden');
+    } else {
+      deleteBtn.classList.add('hidden');
+    }
+
+    modal.classList.remove('hidden');
+    nameInput.focus();
+  }
+
+  // ----- Save (PATCH) -----
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearMessage();
+
+    const targetId = targetInput.value;
+    if (!targetId) { showMessage('No target profile selected.', 'error'); return; }
+
+    const name = nameInput.value.trim();
+    const telegram = telegramInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!name) { showMessage('Name must not be empty.', 'error'); return; }
+    if (password && password.length < 6) {
+      showMessage('New password must be at least 6 characters long.', 'error');
+      return;
+    }
+
+    const body = { name, telegram_chat_id: telegram || null };
+    if (password) body.password = password;
+
+    setSaving(true);
+    try {
+      const res = await apiFetch(`/api/users/${targetId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      // Keep the in-memory session + header badge in sync when editing self.
+      if (String(CURRENT_USER.id) === String(targetId)) {
+        CURRENT_USER.name = data.name;
+        CURRENT_USER.telegram_chat_id = data.telegram_chat_id;
+        renderUserBadge();
+      }
+
+      showMessage('Profile updated successfully.', 'success');
+      setSaving(false);
+
+      // Refresh the admin dropdown (names) and close after a brief moment.
+      if (isAdminUser()) { await loadUsers(); }
+      setTimeout(() => { closeProfileSettings(); loadDashboard(false); }, 700);
+    } catch (err) {
+      showMessage(err.message || 'Failed to update profile.', 'error');
+      setSaving(false);
+    }
+  });
+
+  // ----- Delete (admin only) -----
+  deleteBtn.addEventListener('click', async () => {
+    clearMessage();
+    const targetId = targetInput.value;
+    if (!targetId) return;
+
+    if (String(CURRENT_USER.id) === String(targetId)) {
+      showMessage('You cannot delete your own account.', 'error');
+      return;
+    }
+
+    const targetName = nameInput.value.trim() || ('profile #' + targetId);
+    const ok = window.confirm(
+      `Delete "${targetName}"?\n\nThis permanently removes the profile along with all of its plants and alerts. This action cannot be undone.`
+    );
+    if (!ok) return;
+
+    deleteBtn.disabled = true;
+    try {
+      await apiFetch(`/api/users/${targetId}`, { method: 'DELETE' });
+
+      // If the deleted profile was the active scope, reset to global overview.
+      if (String(getActiveUserId()) === String(targetId)) {
+        setActiveUserId(null);
+      }
+
+      closeProfileSettings();
+      await loadUsers();
+      await loadSavedGardenPlots();
+      await loadDashboard(false);
+    } catch (err) {
+      showMessage(err.message || 'Failed to delete profile.', 'error');
+    } finally {
+      deleteBtn.disabled = false;
+    }
+  });
+
+  // ----- Wiring: open / close triggers -----
+  const settingsBtn = document.getElementById('settings-btn');
+  if (settingsBtn) settingsBtn.addEventListener('click', openProfileSettings);
+  if (closeBtn) closeBtn.addEventListener('click', closeProfileSettings);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeProfileSettings);
+  if (backdrop) backdrop.addEventListener('click', closeProfileSettings);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeProfileSettings();
+  });
+})();
+>>>>>>> Stashed changes
 </script>
 </body>
 </html>

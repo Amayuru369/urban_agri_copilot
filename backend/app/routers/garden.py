@@ -4,17 +4,23 @@ Endpoints:
 - POST /garden/plants — Register a new tracked plant.
 - GET  /garden/dashboard — Evaluate state and return all plants with alerts.
 - PATCH /garden/alerts/{alert_id}/resolve — Mark an alert as resolved.
+
+All plant-facing endpoints accept an optional `X-User-Id` header to scope
+results to a specific judge profile. When the header is missing or invalid,
+the endpoints fall back to returning all records (backward compatible).
 """
 
 import logging
 from datetime import date
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.app.core.database import get_db
-from backend.app.models.garden import PlantAlert, TrackedPlant
+from backend.app.core.auth import get_current_user
+from backend.app.models.garden import PlantAlert, TrackedPlant, User
 from backend.app.services.garden_monitor import evaluate_garden_state
 
 logger = logging.getLogger(__name__)
@@ -65,13 +71,62 @@ class AlertResolveResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Auth-aware scoping helper
+# ---------------------------------------------------------------------------
+
+
+def _resolve_scope_user_id(
+    current_user: Optional[User],
+    x_user_id: Optional[int],
+) -> Optional[int]:
+    """Resolve which user_id (if any) the current request should be scoped to.
+
+    Precedence:
+    1. Authenticated non-admin → locked to their own user.id (ignores header).
+    2. Authenticated admin    → honours X-User-Id header (None = see everything).
+    3. No JWT                 → legacy fallback: honour X-User-Id header.
+    """
+    if current_user is not None:
+        if not getattr(current_user, "is_admin", False):
+            return current_user.id
+        # Admin — allow header-based filtering (None means global overview)
+        return x_user_id if x_user_id is not None else None
+
+    # Legacy path — no JWT supplied
+    return x_user_id
+
+
+# ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
 
 
 @router.post("/plants", status_code=201)
-async def create_plant(payload: PlantCreate, db: Session = Depends(get_db)):
-    """Register a new tracked plant for monitoring."""
+async def create_plant(
+    payload: PlantCreate,
+    db: Session = Depends(get_db),
+    x_user_id: Optional[int] = Header(default=None, alias="X-User-Id"),
+    current_user: Optional[User] = Depends(get_current_user),
+):
+    """Register a new tracked plant for monitoring.
+
+    Owner resolution:
+    - Authenticated non-admin growers always own their own plants.
+    - Authenticated admins can plant on behalf of a profile via X-User-Id.
+    - Legacy callers (no JWT) can still use X-User-Id, or leave the plant
+      unscoped for backward compatibility.
+    """
+    owner_id = _resolve_scope_user_id(current_user, x_user_id)
+
+    owner_chat_id: Optional[str] = None
+    if owner_id is not None:
+        owner = db.query(User).filter(User.id == owner_id).first()
+        if owner:
+            owner_chat_id = owner.telegram_chat_id
+
+    # Fall back to the profile's chat ID when the payload didn't provide one
+    effective_chat_id = payload.telegram_chat_id or owner_chat_id
+
     plant = TrackedPlant(
         crop_name=payload.crop_name,
         planted_date=payload.planted_date,
@@ -79,32 +134,50 @@ async def create_plant(payload: PlantCreate, db: Session = Depends(get_db)):
         latitude=payload.latitude,
         longitude=payload.longitude,
         location_name=payload.location_name or "Home Garden",
-        telegram_chat_id=payload.telegram_chat_id,
+        telegram_chat_id=effective_chat_id,
         active=True,
+        user_id=owner_id,
     )
     db.add(plant)
     db.commit()
     db.refresh(plant)
-    
-    # STOP HERE. Do not add the try/except weather check.
-    # The frontend will trigger the evaluation automatically.
-    
+
     return {
         "id": plant.id,
         "crop_name": plant.crop_name,
         "planted_date": plant.planted_date.isoformat(),
+        "user_id": plant.user_id,
         "message": "Plant registered successfully.",
     }
 
 
 @router.get("/dashboard")
-async def get_dashboard(refresh: bool = False, db: Session = Depends(get_db)):
-    """Return dashboard state. Only evaluates live weather when refresh=True."""
+async def get_dashboard(
+    refresh: bool = False,
+    db: Session = Depends(get_db),
+    x_user_id: Optional[int] = Header(default=None, alias="X-User-Id"),
+    current_user: Optional[User] = Depends(get_current_user),
+):
+    """Return dashboard state, scoped by JWT role with X-User-Id fallback.
+
+    - Non-admin growers only see their own plants.
+    - Admins see everything (or a specific profile when X-User-Id is sent).
+    - Unauthenticated legacy callers fall back to the X-User-Id header.
+
+    Only evaluates live weather when refresh=True.
+    """
     if refresh:
         await evaluate_garden_state(db)
 
+    scope_user_id = _resolve_scope_user_id(current_user, x_user_id)
+
     today = date.today()
-    plants = db.query(TrackedPlant).filter(TrackedPlant.active == True).all()  # noqa: E712
+    query = db.query(TrackedPlant).filter(TrackedPlant.active == True)  # noqa: E712
+
+    if scope_user_id is not None:
+        query = query.filter(TrackedPlant.user_id == scope_user_id)
+
+    plants = query.all()
 
     # Import here to avoid circular import at module level
     from backend.app.services.garden_monitor import MILESTONE_SCHEDULE, _DEFAULT_MILESTONES
@@ -152,6 +225,7 @@ async def get_dashboard(refresh: bool = False, db: Session = Depends(get_db)):
             "longitude": plant.longitude,
             "location_name": getattr(plant, "location_name", "Home Garden"),
             "telegram_chat_id": plant.telegram_chat_id,
+            "user_id": getattr(plant, "user_id", None),
             "active": plant.active,
             "days_active": days_active,
             "progress_pct": progress_pct,
@@ -161,6 +235,7 @@ async def get_dashboard(refresh: bool = False, db: Session = Depends(get_db)):
     return {
         "evaluated_on": today.isoformat(),
         "active_plants": len(dashboard),
+        "scoped_user_id": scope_user_id,
         "plants": dashboard,
     }
 
@@ -220,11 +295,35 @@ def reopen_alert(alert_id: int, db: Session = Depends(get_db)):
     return {"id": alert.id, "resolved": False, "message": "Alert reopened successfully."}
 
 @router.delete("/plants/{plant_id}")
-def archive_plant(plant_id: int, db: Session = Depends(get_db)):
-    """Archive/remove a tracked plant from active monitoring."""
+def archive_plant(
+    plant_id: int,
+    db: Session = Depends(get_db),
+    x_user_id: Optional[int] = Header(default=None, alias="X-User-Id"),
+    current_user: Optional[User] = Depends(get_current_user),
+):
+    """Archive/remove a tracked plant from active monitoring.
+
+    Access rules:
+    - Non-admin growers can only archive plants they own.
+    - Admins can archive any plant (or scope via X-User-Id).
+    - Legacy unauthenticated callers keep working with the X-User-Id header.
+    """
     plant = db.query(TrackedPlant).filter(TrackedPlant.id == plant_id).first()
     if not plant:
         raise HTTPException(status_code=404, detail=f"Plant {plant_id} not found.")
+
+    # Strict isolation for authenticated non-admin growers: they may ONLY
+    # archive plants they own. The X-User-Id header is ignored entirely and
+    # even legacy unowned plants (user_id is None) are off-limits, so a grower
+    # can never modify another profile's data. Existence is hidden via 404.
+    if current_user is not None and not getattr(current_user, "is_admin", False):
+        if plant.user_id != current_user.id:
+            raise HTTPException(status_code=404, detail=f"Plant {plant_id} not found.")
+    else:
+        # Admin or legacy unauthenticated caller — honour X-User-Id scoping.
+        scope_user_id = _resolve_scope_user_id(current_user, x_user_id)
+        if scope_user_id is not None and plant.user_id is not None and plant.user_id != scope_user_id:
+            raise HTTPException(status_code=404, detail=f"Plant {plant_id} not found.")
 
     plant.active = False
     db.commit()
@@ -254,4 +353,48 @@ def get_audit_logs(db: Session = Depends(get_db)):
             }
             for log in logs
         ]
+<<<<<<< Updated upstream
     }
+=======
+    }
+
+@router.get("/locations")
+def get_saved_locations(
+    db: Session = Depends(get_db),
+    x_user_id: Optional[int] = Header(default=None, alias="X-User-Id"),
+    current_user: Optional[User] = Depends(get_current_user),
+):
+    """Fetch unique active garden plots to populate the UI dropdown.
+
+    Scoped to the JWT-authenticated grower's own plants, or to X-User-Id for
+    admins / legacy callers.
+    """
+    scope_user_id = _resolve_scope_user_id(current_user, x_user_id)
+
+    query = (
+        db.query(TrackedPlant.location_name, TrackedPlant.latitude, TrackedPlant.longitude)
+        .filter(TrackedPlant.active == True)  # noqa: E712
+    )
+    if scope_user_id is not None:
+        query = query.filter(TrackedPlant.user_id == scope_user_id)
+
+    plants = query.all()
+
+    seen = set()
+    locations = []
+    for loc_name, lat, lon in plants:
+        name = (loc_name or "Home Garden").strip()
+        safe_lat = round(float(lat if lat is not None else 6.9271), 4)
+        safe_lon = round(float(lon if lon is not None else 79.8612), 4)
+
+        key = (name.lower(), round(safe_lat, 2), round(safe_lon, 2))
+        if key not in seen:
+            seen.add(key)
+            locations.append({
+                "location_name": name,
+                "latitude": safe_lat,
+                "longitude": safe_lon,
+            })
+
+    return locations
+>>>>>>> Stashed changes

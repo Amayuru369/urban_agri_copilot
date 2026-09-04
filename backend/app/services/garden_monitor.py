@@ -367,7 +367,11 @@ async def evaluate_garden_state(db: Session) -> int:
                     db.add(alert)
                     new_alert_count += 1
 
-                    target_chat = plant.telegram_chat_id or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+                    target_chat = (
+                        plant.telegram_chat_id
+                        or (plant.user.telegram_chat_id if getattr(plant, "user", None) else None)
+                        or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+                    )
                     if target_chat:
                         loc_name = plant.location_name or "Home Garden"
                         map_url = f"https://www.google.com/maps?q={plant.latitude},{plant.longitude}"
@@ -430,7 +434,11 @@ async def evaluate_garden_state(db: Session) -> int:
                 db.add(alert)
                 new_alert_count += 1
 
-                target_chat = plant.telegram_chat_id or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+                target_chat = (
+                    plant.telegram_chat_id
+                    or (plant.user.telegram_chat_id if getattr(plant, "user", None) else None)
+                    or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+                )
                 if target_chat:
                     loc_name = plant.location_name or "Home Garden"
                     map_url = f"https://www.google.com/maps?q={plant.latitude},{plant.longitude}"
