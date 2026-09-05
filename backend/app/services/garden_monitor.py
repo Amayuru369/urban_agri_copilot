@@ -1,3 +1,4 @@
+from backend.app.models.garden import SystemAuditLog
 """Plant Monitoring & Alert Service.
 
 Background evaluation engine that:
@@ -88,6 +89,38 @@ MILESTONE_SCHEDULE: dict[str, list[dict]] = {
             "severity": "info",
         },
     ],
+    "Chillie": [
+        {
+            "day": 10,
+            "label": "Germination complete",
+            "action": "Move to warm, bright spot (≥20°C). Thin to one seedling per cell.",
+            "severity": "info",
+        },
+        {
+            "day": 30,
+            "label": "Vegetative establishment",
+            "action": "Transplant to ≥10L pot. Apply balanced NPK. Begin weekly neem oil spray for mite prevention.",
+            "severity": "info",
+        },
+        {
+            "day": 55,
+            "label": "Flowering onset",
+            "action": "Switch to bloom booster (high P/K). Avoid overhead watering to protect flowers.",
+            "severity": "info",
+        },
+        {
+            "day": 70,
+            "label": "Fruit development",
+            "action": "Support heavy branches with ties. Maintain even soil moisture to prevent blossom drop.",
+            "severity": "info",
+        },
+        {
+            "day": 90,
+            "label": "Harvest ready",
+            "action": "Pick when pods are firm and fully coloured. Use scissors to avoid stem damage.",
+            "severity": "info",
+        },
+    ],
     "Gotukola": [
         {
             "day": 5,
@@ -114,8 +147,97 @@ MILESTONE_SCHEDULE: dict[str, list[dict]] = {
             "severity": "info",
         },
     ],
+    "Kang-kung": [
+        {
+            "day": 4,
+            "label": "Sprouting visible",
+            "action": "Ensure soil is thoroughly moist. Place in full morning sunlight.",
+            "severity": "info",
+        },
+        {
+            "day": 12,
+            "label": "Vegetative shoot emergence",
+            "action": "Keep water reservoir high. Add dilute nitrogen fertilizer or liquid compost.",
+            "severity": "info",
+        },
+        {
+            "day": 20,
+            "label": "Canopy flush",
+            "action": "Cut top leaves to encourage bushy side branch shoots.",
+            "severity": "info",
+        },
+        {
+            "day": 28,
+            "label": "Harvest ready",
+            "action": "Cut stems 5cm above soil level so new runners regenerate rapidly.",
+            "severity": "info",
+        },
+    ],
+    "Brinjal": [
+        {
+            "day": 8,
+            "label": "Germination complete",
+            "action": "Provide strong light and avoid cold drafts.",
+            "severity": "info",
+        },
+        {
+            "day": 25,
+            "label": "Transplant readiness",
+            "action": "Move to ≥15L container. Add bone meal/compost to soil mix.",
+            "severity": "info",
+        },
+        {
+            "day": 50,
+            "label": "First flowering",
+            "action": "Check under leaves for shoot & fruit borers. Mulch root zone.",
+            "severity": "info",
+        },
+        {
+            "day": 70,
+            "label": "Fruit enlargement",
+            "action": "Stake the plant to hold heavy eggplants. Water regularly to avoid bitter fruit.",
+            "severity": "info",
+        },
+        {
+            "day": 85,
+            "label": "Harvest window opens",
+            "action": "Harvest fruit while skin is glossy and firm before seeds turn brown.",
+            "severity": "info",
+        },
+    ],
+    "Cowpea": [
+        {
+            "day": 5,
+            "label": "Germination complete",
+            "action": "Ensure full sunlight (6+ hours). Avoid waterlogging.",
+            "severity": "info",
+        },
+        {
+            "day": 20,
+            "label": "Vine & trellis training",
+            "action": "Guide climbing shoots up support poles or netting.",
+            "severity": "info",
+        },
+        {
+            "day": 40,
+            "label": "Flowering onset",
+            "action": "Check for aphids and pod borers. Avoid excess nitrogen feed.",
+            "severity": "info",
+        },
+        {
+            "day": 52,
+            "label": "Pod elongation",
+            "action": "Maintain moderate watering as tender green pods swell.",
+            "severity": "info",
+        },
+        {
+            "day": 65,
+            "label": "Harvest window opens",
+            "action": "Pick crisp young green pods before seeds bulge prominently.",
+            "severity": "info",
+        },
+    ],
 }
-
 # Fallback for unlisted crops: generic milestones at 7, 21, 45, 70 days
 _DEFAULT_MILESTONES = [
     {"day": 7, "label": "Germination check", "action": "Verify sprouts emerged; maintain even moisture.", "severity": "info"},
@@ -183,10 +305,10 @@ async def fetch_weather_risk_batch(coords_list: list[tuple[float, float]]) -> di
         min_temp_c = min_temp_list[0] if (min_temp_list and min_temp_list[0] is not None) else 15.0
         wind_gusts_kmh = wind_gusts_list[0] if (wind_gusts_list and wind_gusts_list[0] is not None) else 0.0
 
-        heavy_rain = precip_mm > 15.0
-        extreme_heat = max_temp_c > 38.0
-        extreme_cold = min_temp_c < 2.0
-        high_wind = wind_gusts_kmh > 55.0
+        heavy_rain = precip_mm > 10.0
+        extreme_heat = max_temp_c >= 33.0
+        extreme_cold = min_temp_c <= 14.0
+        high_wind = wind_gusts_kmh >= 35.0
 
         parts = []
         if heavy_rain:
@@ -317,7 +439,7 @@ async def send_daily_morning_digest(db: Session, alert_count: int) -> None:
 # Core Evaluation Engine
 # ---------------------------------------------------------------------------
 
-async def evaluate_garden_state(db: Session) -> int:
+async def evaluate_garden_state(db: Session, trigger_type: str = 'SCHEDULED') -> int:
     """Evaluate all active tracked plants and generate alerts."""
     today = date.today()
     plants = db.query(TrackedPlant).filter(TrackedPlant.active == True).all()  # noqa: E712
@@ -377,7 +499,11 @@ async def evaluate_garden_state(db: Session) -> int:
                     db.add(alert)
                     new_alert_count += 1
 
-                    target_chat = plant.telegram_chat_id or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+                    target_chat = (
+                        plant.telegram_chat_id
+                        or (plant.user.telegram_chat_id if getattr(plant, "user", None) else None)
+                        or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+                    )
                     if target_chat:
                         loc_name = plant.location_name or "Home Garden"
                         map_url = f"https://www.google.com/maps?q={plant.latitude},{plant.longitude}"
@@ -440,32 +566,49 @@ async def evaluate_garden_state(db: Session) -> int:
                 db.add(alert)
                 new_alert_count += 1
 
-                target_chat = plant.telegram_chat_id or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+                target_chat = (
+                    plant.telegram_chat_id
+                    or (plant.user.telegram_chat_id if getattr(plant, "user", None) else None)
+                    or getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
+                )
                 if target_chat:
                     loc_name = plant.location_name or "Home Garden"
                     map_url = f"https://www.google.com/maps?q={plant.latitude},{plant.longitude}"
                     
-                    if weather_risk.get("extreme_cold") and weather_risk.get("high_wind"):
-                        alert_icon = "❄️🌪️"
-                        alert_title = "Severe Frost & Gale Warning"
-                    elif weather_risk.get("heavy_rain") and weather_risk.get("high_wind"):
-                        alert_icon = "🌧️🌪️"
-                        alert_title = "Storm & Heavy Rain Warning"
-                    elif weather_risk.get("high_wind"):
-                        alert_icon = "🌪️"
-                        alert_title = "High Wind Warning"
-                    elif weather_risk.get("extreme_cold"):
-                        alert_icon = "❄️"
-                        alert_title = "Frost / Cold Risk"
-                    elif weather_risk.get("heavy_rain"):
-                        alert_icon = "🌧️"
-                        alert_title = "Heavy Rain Expected"
-                    elif weather_risk.get("extreme_heat"):
-                        alert_icon = "🔥"
-                        alert_title = "Extreme Heat Alert"
+                    # Multi-hazard detection and compound title assembly
+                    icons = []
+                    hazards = []
+
+                    if weather_risk.get("extreme_heat"):
+                        icons.append("🔥")  # 🔥
+                        hazards.append("Extreme Heat")
+                    if weather_risk.get("high_wind"):
+                        icons.append("🌪️")  # 🌪️
+                        hazards.append("Damaging Winds")
+                    if weather_risk.get("heavy_rain"):
+                        icons.append("🌧️")  # 🌧️
+                        hazards.append("Heavy Rain")
+                    if weather_risk.get("extreme_cold"):
+                        icons.append("❄️")  # ❄️
+                        hazards.append("Frost / Cold")
+
+                    if len(hazards) > 1:
+                        alert_icon = "".join(icons)
+                        alert_title = " & ".join(hazards) + " Warning"
+                    elif len(hazards) == 1:
+                        alert_icon = icons[0]
+                        if hazards[0] == "Extreme Heat":
+                            alert_title = "Extreme Heat Alert"
+                        elif hazards[0] == "Damaging Winds":
+                            alert_title = "High Wind Warning"
+                        elif hazards[0] == "Heavy Rain":
+                            alert_title = "Heavy Rain Expected"
+                        else:
+                            alert_title = "Frost / Cold Risk"
                     else:
-                        alert_icon = "⚠️"
+                        alert_icon = "⚠️"  # ⚠️
                         alert_title = "Weather Alert"
+                    
                     
                     tg_text = (
                         f"{alert_icon} <b>{alert_title}</b> — {plant.crop_name}\n"
@@ -477,9 +620,9 @@ async def evaluate_garden_state(db: Session) -> int:
 
     db.commit()
     logger.info("[Garden Monitor] Evaluation complete. %d new alert(s) generated.", new_alert_count)
+
+
     return new_alert_count
-
-
 # ---------------------------------------------------------------------------
 # Scheduler Entrypoint
 # ---------------------------------------------------------------------------

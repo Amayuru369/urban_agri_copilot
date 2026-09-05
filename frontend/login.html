@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UrbanAgri-Copilot — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.011em;
+    }
+    .fade-in { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    .shake { animation: shake 0.35s ease; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 flex items-center justify-center px-4">
+
+  <div class="w-full max-w-md fade-in">
+    <!-- Brand -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-green-600 shadow-lg shadow-emerald-200 mb-4">
+        <span class="text-3xl">🌿</span>
+      </div>
+      <h1 class="text-2xl font-bold text-slate-900">UrbanAgri-Copilot</h1>
+      <p id="subtitle" class="text-sm text-slate-500 mt-1">Sign in to your garden dashboard</p>
+    </div>
+
+    <!-- Card -->
+    <div id="login-card" class="bg-white rounded-2xl border border-slate-200 shadow-xl shadow-emerald-100/50 p-8">
+
+      <!-- ============ LOGIN FORM ============ -->
+      <form id="login-form" class="space-y-5" novalidate>
+        <div>
+          <label for="username" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Username</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            placeholder="e.g. admin"
+            class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+          />
+        </div>
+
+        <!-- Error banner -->
+        <div id="login-error" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3.5 py-2.5"></div>
+
+        <button
+          id="login-submit"
+          type="submit"
+          class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white text-sm font-semibold py-2.5 rounded-lg shadow-md shadow-emerald-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-600/30 active:translate-y-0 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+        >
+          <span id="login-submit-label">Sign In</span>
+          <svg id="login-spinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+        </button>
+      </form>
+
+      <!-- ============ REGISTER FORM ============ -->
+      <form id="register-form" class="space-y-5 hidden" novalidate>
+        <div>
+          <label for="reg-username" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Username</label>
+          <input
+            id="reg-username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            placeholder="Choose a username"
+            class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+          />
+        </div>
+
+        <div>
+          <label for="reg-password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Password</label>
+          <input
+            id="reg-password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Min. 6 characters"
+            class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+          />
+        </div>
+
+        <div>
+          <label for="reg-telegram" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+            Telegram Chat ID <span class="normal-case font-normal text-slate-400">(optional)</span>
+          </label>
+          <input
+            id="reg-telegram"
+            name="telegram_chat_id"
+            type="text"
+            autocomplete="off"
+            placeholder="For alert notifications"
+            class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+          />
+        </div>
+
+        <!-- Error banner -->
+        <div id="register-error" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3.5 py-2.5"></div>
+
+        <button
+          id="register-submit"
+          type="submit"
+          class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white text-sm font-semibold py-2.5 rounded-lg shadow-md shadow-emerald-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-600/30 active:translate-y-0 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+        >
+          <span id="register-submit-label">Create Account</span>
+          <svg id="register-spinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+        </button>
+      </form>
+
+      <!-- ============ MODE TOGGLE ============ -->
+      <p id="mode-toggle" class="text-center text-sm text-slate-500 mt-6">
+        Don't have an account?
+        <button type="button" id="toggle-to-register" class="font-semibold text-emerald-700 hover:text-emerald-900 hover:underline">Sign Up</button>
+      </p>
+      <p id="mode-toggle-back" class="text-center text-sm text-slate-500 mt-6 hidden">
+        Already have an account?
+        <button type="button" id="toggle-to-login" class="font-semibold text-emerald-700 hover:text-emerald-900 hover:underline">Sign In</button>
+      </p>
+    </div>
+
+    <p class="text-center text-xs text-slate-400 mt-6">
+      Protected area · UrbanAgri-Copilot Plant Monitor
+    </p>
+  </div>
+
+  <script>
+    const TOKEN_STORAGE_KEY = 'urbanagri_token';
+
+    // If a valid token already exists, skip the login screen.
+    if (localStorage.getItem(TOKEN_STORAGE_KEY)) {
+      window.location.replace('/');
+    }
+
+    const card = document.getElementById('login-card');
+    const subtitle = document.getElementById('subtitle');
+
+    // ----- Login mode elements -----
+    const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+    const loginSubmit = document.getElementById('login-submit');
+    const loginSubmitLabel = document.getElementById('login-submit-label');
+    const loginSpinner = document.getElementById('login-spinner');
+
+    // ----- Register mode elements -----
+    const registerForm = document.getElementById('register-form');
+    const registerError = document.getElementById('register-error');
+    const registerSubmit = document.getElementById('register-submit');
+    const registerSubmitLabel = document.getElementById('register-submit-label');
+    const registerSpinner = document.getElementById('register-spinner');
+
+    // ----- Toggle links -----
+    const modeToggle = document.getElementById('mode-toggle');
+    const modeToggleBack = document.getElementById('mode-toggle-back');
+    const toRegisterBtn = document.getElementById('toggle-to-register');
+    const toLoginBtn = document.getElementById('toggle-to-login');
+
+    function setButtonLoading(btn, label, spinner, isLoading, loadingText, idleText) {
+      btn.disabled = isLoading;
+      label.textContent = isLoading ? loadingText : idleText;
+      spinner.classList.toggle('hidden', !isLoading);
+    }
+
+    function showError(el, message) {
+      el.textContent = message;
+      el.classList.remove('hidden');
+      card.classList.remove('shake');
+      void card.offsetWidth; // reflow to replay the animation
+      card.classList.add('shake');
+    }
+
+    function clearError(el) {
+      el.classList.add('hidden');
+      el.textContent = '';
+    }
+
+    function showRegisterMode() {
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      modeToggle.classList.add('hidden');
+      modeToggleBack.classList.remove('hidden');
+      subtitle.textContent = 'Create your grower account';
+      clearError(loginError);
+      clearError(registerError);
+      document.getElementById('reg-username').focus();
+    }
+
+    function showLoginMode() {
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      modeToggleBack.classList.add('hidden');
+      modeToggle.classList.remove('hidden');
+      subtitle.textContent = 'Sign in to your garden dashboard';
+      clearError(loginError);
+      clearError(registerError);
+      document.getElementById('username').focus();
+    }
+
+    toRegisterBtn.addEventListener('click', showRegisterMode);
+    toLoginBtn.addEventListener('click', showLoginMode);
+
+    // ----- Login submit -----
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearError(loginError);
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        showError(loginError, 'Please enter both your username and password.');
+        return;
+      }
+
+      setButtonLoading(loginSubmit, loginSubmitLabel, loginSpinner, true, 'Signing in…', 'Sign In');
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(typeof data.detail === 'string' ? data.detail : 'Login failed. Please try again.');
+        }
+        if (!data.access_token) {
+          throw new Error('Server did not return an access token.');
+        }
+        localStorage.setItem(TOKEN_STORAGE_KEY, data.access_token);
+        window.location.replace('/');
+      } catch (err) {
+        showError(loginError, err.message || 'Login failed. Please try again.');
+        setButtonLoading(loginSubmit, loginSubmitLabel, loginSpinner, false, 'Signing in…', 'Sign In');
+      }
+    });
+
+    // ----- Register submit -----
+    registerForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearError(registerError);
+
+      const username = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const telegram = document.getElementById('reg-telegram').value.trim();
+
+      if (!username || !password) {
+        showError(registerError, 'Please choose a username and password.');
+        return;
+      }
+      if (password.length < 6) {
+        showError(registerError, 'Password must be at least 6 characters long.');
+        return;
+      }
+
+      setButtonLoading(registerSubmit, registerSubmitLabel, registerSpinner, true, 'Creating account…', 'Create Account');
+      try {
+        // 1. Register the new grower account.
+        const regRes = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            password,
+            telegram_chat_id: telegram || null,
+          }),
+        });
+        const regData = await regRes.json().catch(() => ({}));
+        if (!regRes.ok) {
+          throw new Error(typeof regData.detail === 'string' ? regData.detail : 'Registration failed. Please try again.');
+        }
+
+        // 2. Auto-login with the new credentials.
+        const loginRes = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const loginData = await loginRes.json().catch(() => ({}));
+        if (!loginRes.ok || !loginData.access_token) {
+          // Registration succeeded but auto-login failed — fall back to sign in.
+          showLoginMode();
+          document.getElementById('username').value = username;
+          showError(loginError, 'Account created! Please sign in with your new password.');
+          return;
+        }
+
+        localStorage.setItem(TOKEN_STORAGE_KEY, loginData.access_token);
+        window.location.replace('/');
+      } catch (err) {
+        showError(registerError, err.message || 'Registration failed. Please try again.');
+        setButtonLoading(registerSubmit, registerSubmitLabel, registerSpinner, false, 'Creating account…', 'Create Account');
+      }
+    });
+  </script>
+</body>
+</html>

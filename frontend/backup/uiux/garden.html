@@ -79,9 +79,9 @@ function setLocationFieldsLocked(locked) {
     if (!el) return;
     el.readOnly = locked;
     if (locked) {
-      el.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+      el.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
     } else {
-      el.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+      el.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
     }
   });
 
@@ -97,23 +97,8 @@ function setLocationFieldsLocked(locked) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UrbanAgri-Copilot — Plant Monitor</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      letter-spacing: -0.011em;
-    }
-    input[type="range"] { accent-color: #059669; }
-    .thin-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
-    .thin-scroll::-webkit-scrollbar-track { background: transparent; }
-    .thin-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 9999px; }
-    .thin-scroll::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
     .progress-bar-fill { transition: width 0.6s ease-in-out; }
     .alert-badge { animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
@@ -121,46 +106,44 @@ function setLocationFieldsLocked(locked) {
     @keyframes cardIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
-
+<body class="bg-gray-50 min-h-screen">
 
   <!-- Header -->
-  <header class="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-green-900 to-emerald-800 text-white shadow-lg shadow-emerald-900/10 sticky top-0 z-50">
-    <div class="absolute inset-0 opacity-[0.06] pointer-events-none" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 22px 22px;"></div>
-    <div class="relative max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur text-xl shadow-inner">🌿</div>
+        <span class="text-2xl">🌿</span>
         <div>
-          <h1 class="text-lg font-bold text-white leading-tight">Plant Monitor</h1>
-          <p class="text-xs text-emerald-100/80">UrbanAgri-Copilot · Growth Tracking &amp; Alerts</p>
+          <h1 class="text-lg font-bold text-gray-900 leading-tight">Plant Monitor</h1>
+          <p class="text-xs text-gray-500">UrbanAgri-Copilot · Growth Tracking & Alerts</p>
         </div>
       </div>
-      <div class="flex flex-wrap items-center gap-2.5">
+      <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5">
-          <label for="profile-select" class="text-[11px] font-medium text-emerald-100/80 hidden sm:inline">User:</label>
+          <label for="profile-select" class="text-[11px] font-medium text-gray-500 hidden sm:inline">User:</label>
           <select
             id="profile-select"
-            class="text-xs border border-white/20 rounded-lg px-2 py-1.5 bg-white/10 text-white backdrop-blur focus:ring-2 focus:ring-white/40 focus:border-white/40 max-w-[180px]"
+            class="text-xs border border-gray-300 rounded-md px-2 py-1.5 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 max-w-[180px]"
             title="Active user profile"
           >
             <option value="">🛡️ Admin (Global Overview)</option>
             <option value="__new__">＋ New User Profile</option>
           </select>
         </div>
-        <a href="/" class="text-xs font-semibold text-emerald-50 hover:text-white bg-white/10 hover:bg-white/20 ring-1 ring-white/15 px-3 py-2 rounded-lg transition-all duration-200">← Planner</a>
-        <button id="refresh-btn" class="text-xs font-semibold bg-white text-emerald-900 hover:bg-emerald-50 px-3 py-2 rounded-lg shadow-sm ring-1 ring-white/20 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-1.5">
+        <a href="/" class="text-xs text-green-700 hover:text-green-900 font-medium px-3 py-1.5 rounded-md border border-green-200 hover:bg-green-50 transition">← Planner</a>
+        <button id="refresh-btn" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-md font-medium hover:bg-green-800 transition flex items-center gap-1">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           Refresh
         </button>
-        <div id="user-badge" class="hidden items-center gap-2 pl-3 border-l border-white/20">
+        <div id="user-badge" class="hidden items-center gap-2 pl-3 border-l border-gray-200">
           <div class="text-right leading-tight">
-            <p id="user-badge-name" class="text-xs font-semibold text-white max-w-[140px] truncate">—</p>
-            <p id="user-badge-role" class="text-[10px] font-bold uppercase tracking-wider text-emerald-200">—</p>
+            <p id="user-badge-name" class="text-xs font-semibold text-gray-800 max-w-[140px] truncate">—</p>
+            <p id="user-badge-role" class="text-[10px] font-medium text-gray-400 uppercase tracking-wide">—</p>
           </div>
-          <button id="settings-btn" title="Profile settings" class="text-xs font-medium text-emerald-50 hover:text-white bg-white/10 hover:bg-white/20 ring-1 ring-white/15 px-2.5 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1">
+          <button id="settings-btn" title="Profile settings" class="text-xs text-gray-600 hover:text-green-700 font-medium px-2 py-1.5 rounded-md border border-gray-200 hover:bg-green-50 transition flex items-center gap-1">
             <span>⚙️</span><span class="hidden sm:inline">Settings</span>
           </button>
-          <button id="logout-btn" title="Sign out" class="text-xs font-medium text-emerald-50 hover:text-white bg-white/10 hover:bg-red-500/90 ring-1 ring-white/15 hover:ring-red-400/40 px-2.5 py-1.5 rounded-lg transition-all duration-200">
+          <button id="logout-btn" title="Sign out" class="text-xs text-gray-500 hover:text-red-600 font-medium px-2 py-1.5 rounded-md border border-gray-200 hover:bg-red-50 transition">
             Logout
           </button>
         </div>
@@ -168,17 +151,17 @@ function setLocationFieldsLocked(locked) {
     </div>
   </header>
 
-  <main class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
     <!-- Registration Form -->
-    <section class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
-      <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4">🌱 Register New Plant</h2>
-      <form id="plant-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+    <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wide mb-4">🌱 Register New Plant</h2>
+      <form id="plant-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
 
-        <!-- Col 1: Crop Type -->
+<!-- Col 1: Crop Type -->
         <div>
-          <label for="crop_name" class="block text-xs font-medium text-slate-600 mb-1">Crop Type</label>
-          <select id="crop_name" required class="w-full text-sm border border-slate-300 rounded-lg shadow-sm px-3.5 py-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+          <label for="crop_name" class="block text-xs font-medium text-gray-600 mb-1">Crop Type</label>
+          <select id="crop_name" required class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
             <option value="Chillie">🌶️ Chillie</option>
             <option value="Tomato">🍅 Tomato</option>
             <option value="Gotukola">🥬 Gotukola</option>
@@ -190,126 +173,121 @@ function setLocationFieldsLocked(locked) {
 
         <!-- Col 2: Plant Note -->
         <div>
-          <label for="plant_label" class="block text-xs font-medium text-slate-600 mb-1">Plant Note / Identifier <span class="text-slate-400">(optional)</span></label>
-          <input id="plant_label" type="text" placeholder="e.g. Pot A, Bed 2, Balcony" class="w-full text-sm border border-slate-300 rounded-lg shadow-sm px-3.5 py-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
+          <label for="plant_label" class="block text-xs font-medium text-gray-600 mb-1">Plant Note / Identifier <span class="text-gray-400">(optional)</span></label>
+          <input id="plant_label" type="text" placeholder="e.g. Pot A, Bed 2, Balcony" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
         </div>
 
-        <!-- Col 3: Pot Size & Quantity -->
+        <!-- Col 3: Number of Pots (uses pot_size_liters under the hood) -->
         <div>
-          <label for="pot_size_liters" class="block text-xs font-medium text-slate-600 mb-1">Pot Size (L) &amp; Quantity</label>
-          <div class="flex gap-2">
-            <input id="pot_size_liters" type="number" min="0.5" max="200" step="0.5" value="15" required title="Pot size in liters" placeholder="Liters" class="w-1/2 text-sm border border-slate-300 rounded-lg shadow-sm px-3 py-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-            <input id="quantity" type="number" min="1" max="1000" step="1" value="1" required title="Number of pots this entry represents" placeholder="Qty" class="w-1/2 text-sm border border-slate-300 rounded-lg shadow-sm px-3 py-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-          </div>
+          <label for="pot_size_liters" class="block text-xs font-medium text-gray-600 mb-1">Quantity (pots)</label>
+          <input id="pot_size_liters" type="number" min="1" max="1000" step="1" value="1" required class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
         </div>
 
         <!-- Col 4: Planted Date -->
         <div>
-          <label for="planted_date" class="block text-xs font-medium text-slate-600 mb-1">Planted Date</label>
-          <input id="planted_date" type="date" required class="w-full text-sm border border-slate-300 rounded-lg shadow-sm px-3.5 py-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
+          <label for="planted_date" class="block text-xs font-medium text-gray-600 mb-1">Planted Date</label>
+          <input id="planted_date" type="date" required class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
         </div>
 
-        <!-- Row 2: Location & Telegram Details (Spans all 4 columns, splits evenly into 3) -->
-        <div class="col-span-1 sm:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+        <!-- Row 2: Location & Telegram Details (Spans all 4 outer columns, splits into 3) -->
+        <div class="sm:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label for="telegram_chat_id" class="block text-xs font-medium text-slate-600 mb-1">
-              Telegram Chat ID <span class="text-slate-400">(optional override)</span>
+            <label for="telegram_chat_id" class="block text-xs font-medium text-gray-600 mb-1">
+              Telegram Chat ID <span class="text-gray-400">(optional override)</span>
             </label>
             <input 
               type="text" 
               id="telegram_chat_id" 
               name="telegram_chat_id"
-              class="w-full text-sm border border-slate-300 rounded-lg shadow-sm px-3.5 py-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+              class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
               placeholder="Leave blank to use profile default"
             />
           </div>
 
           <div>
-            <label for="plot_select" class="block text-xs font-medium text-slate-600 mb-1">Saved Location</label>
-            <select id="plot_select" class="w-full text-sm border border-slate-300 rounded-lg shadow-sm px-3.5 py-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+            <label for="plot_select" class="block text-xs font-medium text-gray-600 mb-1">Saved Location</label>
+            <select id="plot_select" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
               <option value="new">+ Add New Location</option>
             </select>
           </div>
 
           <div>
-            <label for="location_name" class="block text-xs font-medium text-slate-600 mb-1">Location Name</label>
-            <input id="location_name" type="text" placeholder="e.g. Back Garden or Colombo" class="w-full text-sm border border-slate-300 rounded-lg shadow-sm px-3.5 py-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
+            <label for="location_name" class="block text-xs font-medium text-gray-600 mb-1">Location Name</label>
+            <input id="location_name" type="text" placeholder="e.g. Back Garden or Colombo" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
         </div>
 
-        <!-- Row 3: Map Section (Spans all 4 columns) -->
-        <div class="col-span-1 sm:col-span-2 lg:col-span-4 mt-2 w-full">
-          <div class="mb-3 w-full">
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Garden Coordinates</label>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2 w-full">
-              <div class="w-full">
-                <label for="latitude" class="block text-[11px] font-medium text-slate-500 mb-1">Latitude (°N/S)</label>
+        <!-- Row 3: Map Section (Spans all 4 outer columns) -->
+        <div class="sm:col-span-2 lg:col-span-4 mt-2">
+          <div class="mb-3">
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5">Garden Coordinates</label>
+            <div class="grid grid-cols-2 gap-3 mb-2">
+              <div>
+                <label for="latitude" class="block text-[11px] font-medium text-gray-500 mb-1">Latitude (°N/S)</label>
                 <input
                   type="number"
                   step="any"
                   id="latitude"
                   name="latitude"
                   placeholder="e.g. 6.9271"
-                  class="w-full block px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  class="w-full px-3 py-1.5 text-xs rounded border border-gray-300 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 />
               </div>
-              <div class="w-full">
-                <label for="longitude" class="block text-[11px] font-medium text-slate-500 mb-1">Longitude (°E/W)</label>
+              <div>
+                <label for="longitude" class="block text-[11px] font-medium text-gray-500 mb-1">Longitude (°E/W)</label>
                 <input
                   type="number"
                   step="any"
                   id="longitude"
                   name="longitude"
                   placeholder="e.g. 79.8612"
-                  class="w-full block px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  class="w-full px-3 py-1.5 text-xs rounded border border-gray-300 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 />
               </div>
             </div>
-
-            <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <div class="flex items-center justify-between text-[11px] text-gray-400">
               <span>Type coordinates directly or drag/click the map pin below.</span>
-              <span id="coords-display" class="font-mono text-slate-600 font-medium"></span>
+              <span id="coords-display" class="font-mono text-gray-600 font-medium"></span>
             </div>
           </div>
 
-          <div id="map" class="h-56 w-full rounded-xl border border-slate-200"></div>
+          <div id="map" class="h-56 w-full rounded border border-gray-200"></div>
         </div>
 
         <!-- Row 4: Submit Button -->
         <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-3 pt-2">
-          <button type="submit" id="submit-btn" class="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg shadow-md shadow-emerald-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-600/30 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+          <button type="submit" id="submit-btn" class="bg-green-700 text-white text-sm font-medium px-6 py-2.5 rounded-md hover:bg-green-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
             Add Plant
           </button>
-          <span id="form-status" class="text-xs text-slate-500"></span>
+          <span id="form-status" class="text-xs text-gray-500"></span>
         </div>
 
       </form>
     </section>
     <!-- Stats Bar -->
     <section id="stats-bar" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-4 text-center">
-        <div id="stat-plants" class="text-2xl font-bold text-slate-900">-</div>
-        <div class="text-xs text-slate-500 mt-1">Active Plants</div>
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <div id="stat-plants" class="text-2xl font-bold text-gray-900">-</div>
+        <div class="text-xs text-gray-500 mt-1">Active Plants</div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-4 text-center">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
         <div id="stat-alerts" class="text-2xl font-bold text-amber-600">-</div>
-        <div class="text-xs text-slate-500 mt-1">Open Alerts</div>
+        <div class="text-xs text-gray-500 mt-1">Open Alerts</div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-4 text-center">
-        <div id="stat-milestones" class="text-2xl font-bold text-emerald-700">-</div>
-        <div class="text-xs text-slate-500 mt-1">Milestones</div>
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+        <div id="stat-milestones" class="text-2xl font-bold text-green-700">-</div>
+        <div class="text-xs text-gray-500 mt-1">Milestones</div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-4 text-center">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
         <div id="stat-weather" class="text-2xl font-bold text-red-600">-</div>
-        <div class="text-xs text-slate-500 mt-1">Weather Alerts</div>
+        <div class="text-xs text-gray-500 mt-1">Weather Alerts</div>
       </div>
     </section>
 
     <!-- Loading State -->
     <div id="loading" class="flex justify-center py-12">
-      <div class="flex items-center gap-2 text-sm text-slate-500">
-        <svg class="animate-spin w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24">
+      <div class="flex items-center gap-2 text-sm text-gray-500">
+        <svg class="animate-spin w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
@@ -320,48 +298,48 @@ function setLocationFieldsLocked(locked) {
     <!-- Empty State -->
     <div id="empty-state" class="hidden text-center py-16">
       <div class="text-5xl mb-4">🪴</div>
-      <h3 class="text-lg font-semibold text-slate-700">No plants tracked yet</h3>
-      <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">Register your first plant above to start receiving growth milestones and weather alerts.</p>
+      <h3 class="text-lg font-semibold text-gray-700">No plants tracked yet</h3>
+      <p class="text-sm text-gray-500 mt-1 max-w-sm mx-auto">Register your first plant above to start receiving growth milestones and weather alerts.</p>
     </div>
 
     <!-- Dashboard Grid -->
     <section id="dashboard-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></section>
 
     <!-- System Audit Log -->
-    <section class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
+    <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">🗂️ System Audit Log</h2>
-        <span class="text-[10px] text-slate-400">Last 10 autonomous executions</span>
+        <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wide">🗂️ System Audit Log</h2>
+        <span class="text-[10px] text-gray-400">Last 10 autonomous executions</span>
       </div>
-      <div id="audit-log-container" class="overflow-x-auto thin-scroll">
-        <div class="text-sm text-slate-400 italic py-4 text-center">Loading audit logs...</div>
+      <div id="audit-log-container" class="overflow-x-auto">
+        <div class="text-sm text-gray-400 italic py-4 text-center">Loading audit logs...</div>
       </div>
     </section>
 
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-200 bg-white mt-12">
-    <div class="max-w-screen-2xl mx-auto px-4 py-4 text-center text-xs text-slate-400">
+  <footer class="border-t border-gray-200 bg-white mt-12">
+    <div class="max-w-7xl mx-auto px-4 py-4 text-center text-xs text-gray-400">
       UrbanAgri-Copilot · Plant Monitor · Alerts evaluated daily at 06:00 AM
     </div>
   </footer>
 
   <!-- Alert History Modal -->
   <div id="history-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[85vh] flex flex-col">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+    <div class="bg-white rounded-xl max-w-lg w-full p-5 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-200">
         <div>
-          <h3 id="history-modal-title" class="text-sm font-bold text-slate-900">Alert History</h3>
-          <p class="text-[11px] text-slate-500">Past milestones, warnings, and weather risks</p>
+          <h3 id="history-modal-title" class="text-sm font-bold text-gray-900">Alert History</h3>
+          <p class="text-[11px] text-gray-500">Past milestones, warnings, and weather risks</p>
         </div>
-        <button onclick="closeAlertHistory()" class="text-slate-400 hover:text-slate-600 text-lg font-bold px-2 py-1">✕</button>
+        <button onclick="closeAlertHistory()" class="text-gray-400 hover:text-gray-600 text-lg font-bold px-2 py-1">✕</button>
       </div>
 
-      <div id="history-modal-content" class="py-3 overflow-y-auto thin-scroll space-y-3 flex-1"></div>
+      <div id="history-modal-content" class="py-3 overflow-y-auto space-y-3 flex-1"></div>
 
-      <div class="pt-3 border-t border-slate-200 text-right">
-        <button onclick="closeAlertHistory()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition-colors duration-200">
+      <div class="pt-3 border-t border-gray-200 text-right">
+        <button onclick="closeAlertHistory()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-4 py-2 rounded-md transition">
           Close
         </button>
       </div>
@@ -374,38 +352,38 @@ function setLocationFieldsLocked(locked) {
     <div id="profile-settings-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
     <!-- Dialog -->
-    <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 card-enter">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+    <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200 card-enter">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div>
-          <h3 class="text-base font-bold text-slate-900">⚙️ Profile Settings</h3>
-          <p id="profile-settings-subtitle" class="text-xs text-slate-500 mt-0.5">Update your account details</p>
+          <h3 class="text-base font-bold text-gray-900">⚙️ Profile Settings</h3>
+          <p id="profile-settings-subtitle" class="text-xs text-gray-500 mt-0.5">Update your account details</p>
         </div>
-        <button id="profile-settings-close" type="button" class="text-slate-400 hover:text-slate-700 text-xl leading-none px-1" aria-label="Close">&times;</button>
+        <button id="profile-settings-close" type="button" class="text-gray-400 hover:text-gray-700 text-xl leading-none px-1" aria-label="Close">&times;</button>
       </div>
 
       <form id="profile-settings-form" class="px-6 py-5 space-y-4">
         <input type="hidden" id="ps-target-id" />
 
         <div>
-          <label for="ps-name" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Name</label>
+          <label for="ps-name" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Name</label>
           <input id="ps-name" type="text" autocomplete="off"
-            class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" />
+            class="w-full text-sm border border-gray-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
         </div>
 
         <div>
-          <label for="ps-telegram" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-            Telegram Chat ID <span class="normal-case font-normal text-slate-400">(optional)</span>
+          <label for="ps-telegram" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
+            Telegram Chat ID <span class="normal-case font-normal text-gray-400">(optional)</span>
           </label>
           <input id="ps-telegram" type="text" autocomplete="off" placeholder="For alert notifications"
-            class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" />
+            class="w-full text-sm border border-gray-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
         </div>
 
         <div>
-          <label for="ps-password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-            New Password <span class="normal-case font-normal text-slate-400">(leave blank to keep current)</span>
+          <label for="ps-password" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
+            New Password <span class="normal-case font-normal text-gray-400">(leave blank to keep current)</span>
           </label>
           <input id="ps-password" type="password" autocomplete="new-password" placeholder="Min. 6 characters"
-            class="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition" />
+            class="w-full text-sm border border-gray-300 rounded-lg px-3.5 py-2.5 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
         </div>
 
         <!-- Feedback banner -->
@@ -418,11 +396,11 @@ function setLocationFieldsLocked(locked) {
           </button>
           <div class="flex items-center gap-2 ml-auto">
             <button id="ps-cancel-btn" type="button"
-              class="text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-300 px-3.5 py-2.5 rounded-lg transition">
+              class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3.5 py-2.5 rounded-lg transition">
               Cancel
             </button>
             <button id="ps-save-btn" type="submit"
-              class="text-xs font-semibold text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-4 py-2.5 rounded-lg shadow-md shadow-emerald-600/20 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+              class="text-xs font-semibold text-white bg-green-700 hover:bg-green-800 px-4 py-2.5 rounded-lg transition flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
               <span id="ps-save-label">Save Changes</span>
               <svg id="ps-save-spinner" class="hidden animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -632,7 +610,7 @@ const marker = L.marker(defaultCoords, { draggable: true }).addTo(map);
 
 function progressColor(pct) {
   if (pct >= 80) return 'bg-emerald-500';
-  if (pct >= 50) return 'bg-emerald-500';
+  if (pct >= 50) return 'bg-green-500';
   if (pct >= 25) return 'bg-amber-500';
   return 'bg-blue-500';
 }
@@ -757,14 +735,14 @@ function appendPlantPlaceholder(cropName, locationName) {
   placeholder.className = 'bg-white rounded-xl border border-dashed border-emerald-300 p-5 shadow-sm flex flex-col justify-between min-h-[260px] animate-pulse';
   placeholder.innerHTML = `
     <div>
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-sm font-bold">
             🌱
           </div>
           <div>
-            <h4 class="font-semibold text-slate-800 text-base">${escapeHtml(cropName || 'New Plant')}</h4>
-            <p class="text-xs text-slate-400">📍 ${escapeHtml(locationName || 'Evaluating location...')}</p>
+            <h4 class="font-semibold text-gray-800 text-base">${escapeHtml(cropName || 'New Plant')}</h4>
+            <p class="text-xs text-gray-400">📍 ${escapeHtml(locationName || 'Evaluating location...')}</p>
           </div>
         </div>
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
@@ -775,12 +753,12 @@ function appendPlantPlaceholder(cropName, locationName) {
 
       <div class="py-6 flex flex-col items-center justify-center text-center">
         <div class="w-7 h-7 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p class="text-sm font-medium text-slate-700">Connecting to Open-Meteo...</p>
-        <p class="text-xs text-slate-400 mt-1">Analyzing microclimate & generating alerts</p>
+        <p class="text-sm font-medium text-gray-700">Connecting to Open-Meteo...</p>
+        <p class="text-xs text-gray-400 mt-1">Analyzing microclimate & generating alerts</p>
       </div>
     </div>
 
-    <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+    <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
       <div class="h-full bg-emerald-400 rounded-full w-2/3 animate-pulse"></div>
     </div>
   `;
@@ -796,44 +774,44 @@ function buildPlantCard(plant) {
   const alertCount = alerts.length;
 
   const alertsHtml = alerts.length > 0
-    ? `<div class="space-y-2 mt-3 pt-3 border-t border-slate-100">${alerts.map(a => {
+    ? `<div class="space-y-2 mt-3 pt-3 border-t border-gray-100">${alerts.map(a => {
         const theme = getAlertTheme(a.message, a.alert_type);
         return `
         <div class="alert-badge flex items-start gap-2 p-2 rounded-md border ${theme.border} ${theme.bg}">
           <span class="text-sm flex-shrink-0 mt-0.5">${theme.icon}</span>
           <div class="flex-1 min-w-0">
             <p class="text-xs font-semibold ${theme.text} leading-relaxed">${escapeHtml(a.message)}</p>
-            ${a.action_required ? `<p class="text-[10px] text-slate-700 mt-0.5 leading-relaxed">👉 ${escapeHtml(a.action_required)}</p>` : ''}
+            ${a.action_required ? `<p class="text-[10px] text-gray-700 mt-0.5 leading-relaxed">👉 ${escapeHtml(a.action_required)}</p>` : ''}
           </div>
-          <button onclick="resolveAlert(${a.id}, this)" class="flex-shrink-0 text-[10px] font-medium px-2 py-1 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition" title="Mark as done">
+          <button onclick="resolveAlert(${a.id}, this)" class="flex-shrink-0 text-[10px] font-medium px-2 py-1 rounded bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition" title="Mark as done">
             ✓ Done
           </button>
         </div>
       `;
       }).join('')}</div>`
-    : `<div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-400 italic">No active alerts</div>`;
+    : `<div class="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-400 italic">No active alerts</div>`;
 
   return `
-    <div class="card-enter bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-200">
+    <div class="card-enter bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition">
       <div class="p-5">
         <div class="flex items-start justify-between mb-3">
           <div class="flex items-center gap-2">
             <span class="text-xl">${emoji}</span>
             <div>
-              <h3 class="text-sm font-bold text-slate-900">${escapeHtml(plant.crop_name)}</h3>
-              <p class="text-[11px] font-medium text-emerald-700 mb-0.5 inline-block">
-                <span title="Latitude: ${plant.latitude}&#10;Longitude: ${plant.longitude}" class="cursor-help border-b border-dotted border-emerald-400">
+              <h3 class="text-sm font-bold text-gray-900">${escapeHtml(plant.crop_name)}</h3>
+              <p class="text-[11px] font-medium text-green-700 mb-0.5 inline-block">
+                <span title="Latitude: ${plant.latitude}&#10;Longitude: ${plant.longitude}" class="cursor-help border-b border-dotted border-green-400">
                   📍 ${escapeHtml(plant.location_name || 'Home Garden')}
                 </span>
               </p>
-              <p class="text-[10px] text-slate-500">${(plant.quantity || 1) > 1 ? (plant.quantity + ' × ') : ''}${plant.pot_size_liters}L pot${(plant.quantity || 1) > 1 ? 's' : ''} · planted ${plant.planted_date}</p>
+              <p class="text-[10px] text-gray-500">${Math.round(plant.pot_size_liters)} pot${Math.round(plant.pot_size_liters) > 1 ? 's' : ''} · planted ${plant.planted_date}</p>
             </div>
           </div>
           <div class="flex items-center gap-1.5">
             <button 
               type="button"
               onclick="openAlertHistory(${plant.id}, '${escapeHtml(plant.crop_name)}')" 
-              class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-2 py-1 rounded-lg transition-colors duration-200 flex items-center gap-1" 
+              class="text-[11px] bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-2 py-1 rounded transition flex items-center gap-1" 
               title="View all past and current alerts"
             >
               📜 History
@@ -841,7 +819,7 @@ function buildPlantCard(plant) {
             <button 
               type="button"
               onclick="archivePlant(${plant.id}, '${escapeHtml(plant.crop_name)}')"
-              class="text-[11px] bg-red-50 hover:bg-red-100 text-red-600 font-medium px-2 py-1 rounded-lg transition-colors duration-200"
+              class="text-[11px] bg-red-50 hover:bg-red-100 text-red-600 font-medium px-2 py-1 rounded transition"
               title="Archive this plant"
             >
               🗑️
@@ -853,15 +831,15 @@ function buildPlantCard(plant) {
         <!-- Days Active & Progress -->
         <div class="mb-3">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-medium text-slate-700">Day ${plant.days_active}</span>
-            <span class="text-xs text-slate-500">${pct.toFixed(0)}% to harvest</span>
+            <span class="text-xs font-medium text-gray-700">Day ${plant.days_active}</span>
+            <span class="text-xs text-gray-500">${pct.toFixed(0)}% to harvest</span>
           </div>
-          <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+          <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
             <div class="progress-bar-fill ${progressColor(pct)} h-2.5 rounded-full" style="width: ${pct}%"></div>
           </div>
           <div class="flex justify-between mt-1">
-            <span class="text-[10px] text-slate-400">Planted</span>
-            <span class="text-[10px] text-slate-400">Harvest</span>
+            <span class="text-[10px] text-gray-400">Planted</span>
+            <span class="text-[10px] text-gray-400">Harvest</span>
           </div>
         </div>
 
@@ -968,7 +946,6 @@ document.getElementById('plant-form').addEventListener('submit', async (e) => {
   const payload = {
     crop_name: cropName,
     pot_size_liters: parseFloat(document.getElementById('pot_size_liters').value),
-    quantity: parseInt(document.getElementById('quantity').value, 10) || 1,
     planted_date: document.getElementById('planted_date').value,
     telegram_chat_id: telegramVal.length > 0 ? telegramVal : null,
     location_name: finalLoc,
@@ -999,11 +976,10 @@ document.getElementById('plant-form').addEventListener('submit', async (e) => {
       saveCustomLocation(finalLoc, latitude, longitude);
       if (typeof loadSavedGardenPlots === 'function') await loadSavedGardenPlots();
     }
-    status.className = 'text-xs text-emerald-600 font-medium';
+    status.className = 'text-xs text-green-600 font-medium';
 
     if (document.getElementById('location_name')) document.getElementById('location_name').value = '';
     if (document.getElementById('plant_label')) document.getElementById('plant_label').value = '';
-    if (document.getElementById('quantity')) document.getElementById('quantity').value = '1';
 
     await loadDashboard(false);
     if (typeof loadSavedGardenPlots === 'function') await loadSavedGardenPlots();
@@ -1048,7 +1024,7 @@ async function openAlertHistory(plantId, cropName) {
   const content = document.getElementById('history-modal-content');
 
   title.textContent = `📜 Alert History — ${cropName} (ID #${plantId})`;
-  content.innerHTML = '<p class="text-xs text-center text-slate-400 py-8">Loading history log...</p>';
+  content.innerHTML = '<p class="text-xs text-center text-gray-400 py-8">Loading history log...</p>';
   modal.classList.remove('hidden');
 
   try {
@@ -1057,23 +1033,23 @@ async function openAlertHistory(plantId, cropName) {
     const alerts = data.alerts || [];
 
     if (alerts.length === 0) {
-      content.innerHTML = '<p class="text-xs text-center text-slate-400 py-8">No alerts or milestones recorded yet.</p>';
+      content.innerHTML = '<p class="text-xs text-center text-gray-400 py-8">No alerts or milestones recorded yet.</p>';
       return;
     }
 
     content.innerHTML = alerts.map(a => `
-      <div class="p-3 rounded-lg border text-xs ${a.resolved ? 'bg-slate-50 border-slate-200 text-slate-600' : 'bg-red-50 border-red-200 text-red-900'}">
+      <div class="p-3 rounded-lg border text-xs ${a.resolved ? 'bg-gray-50 border-gray-200 text-gray-600' : 'bg-red-50 border-red-200 text-red-900'}">
         <div class="flex items-center justify-between font-medium text-[11px] mb-1">
-          <span class="uppercase tracking-wider font-bold ${a.resolved ? 'text-slate-500' : 'text-red-700'}">
+          <span class="uppercase tracking-wider font-bold ${a.resolved ? 'text-gray-500' : 'text-red-700'}">
             ${escapeHtml(a.alert_type)} · ${escapeHtml(a.severity)}
           </span>
-          <span class="text-slate-400 text-[10px]">${a.triggered_on}</span>
+          <span class="text-gray-400 text-[10px]">${a.triggered_on}</span>
         </div>
         <p class="font-medium">${escapeHtml(a.message)}</p>
         ${a.action_required ? `<p class="mt-1 text-[11px] opacity-90">👉 ${escapeHtml(a.action_required)}</p>` : ''}
         
-        <div class="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between">
-          <span class="text-[11px] font-medium ${a.resolved ? 'text-slate-500' : 'text-amber-700'}">
+        <div class="mt-2.5 pt-2 border-t border-gray-200/60 flex items-center justify-between">
+          <span class="text-[11px] font-medium ${a.resolved ? 'text-gray-500' : 'text-amber-700'}">
             ${a.resolved ? '✓ Marked as Completed' : '⚠️ Active Alert'}
           </span>
           ${a.resolved ? `
@@ -1141,39 +1117,39 @@ async function loadAuditLogs() {
     const logs = data.audit_logs || [];
 
     if (logs.length === 0) {
-      container.innerHTML = '<div class="text-sm text-slate-400 italic py-4 text-center">No audit records yet. Logs appear after the first monitor run.</div>';
+      container.innerHTML = '<div class="text-sm text-gray-400 italic py-4 text-center">No audit records yet. Logs appear after the first monitor run.</div>';
       return;
     }
 
     container.innerHTML = `
       <table class="w-full text-xs border-collapse">
         <thead>
-          <tr class="border-b border-slate-200 text-left">
-            <th class="py-2 pr-3 font-semibold text-slate-600 whitespace-nowrap">Timestamp</th>
-            <th class="py-2 pr-3 font-semibold text-slate-600 whitespace-nowrap">Trigger</th>
-            <th class="py-2 pr-3 font-semibold text-slate-600">Action</th>
-            <th class="py-2 pr-3 font-semibold text-slate-600">Details</th>
-            <th class="py-2 font-semibold text-slate-600 text-center">Status</th>
+          <tr class="border-b border-gray-200 text-left">
+            <th class="py-2 pr-3 font-semibold text-gray-600 whitespace-nowrap">Timestamp</th>
+            <th class="py-2 pr-3 font-semibold text-gray-600 whitespace-nowrap">Trigger</th>
+            <th class="py-2 pr-3 font-semibold text-gray-600">Action</th>
+            <th class="py-2 pr-3 font-semibold text-gray-600">Details</th>
+            <th class="py-2 font-semibold text-gray-600 text-center">Status</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-gray-100">
           ${logs.map(log => {
             const ts = log.timestamp ? formatTimestamp(log.timestamp) : '-';
             let triggerBadge = '<span class="inline-block px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-medium">CRON</span>';
             if (log.trigger_type === 'STARTUP') {
               triggerBadge = '<span class="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-medium">STARTUP</span>';
             } else if (log.trigger_type === 'MANUAL') {
-              triggerBadge = '<span class="inline-block px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-medium">MANUAL</span>';
+              triggerBadge = '<span class="inline-block px-1.5 py-0.5 rounded bg-green-50 text-green-700 border border-green-200 text-[10px] font-medium">MANUAL</span>';
             }
             const statusBadge = log.status === 'SUCCESS'
-              ? '<span class="inline-block px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">SUCCESS</span>'
+              ? '<span class="inline-block px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-[10px] font-bold">SUCCESS</span>'
               : '<span class="inline-block px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[10px] font-bold">FAILED</span>';
             return `
-              <tr class="hover:bg-slate-50 transition">
-                <td class="py-2 pr-3 text-slate-500 whitespace-nowrap font-mono text-[11px]">${ts}</td>
+              <tr class="hover:bg-gray-50 transition">
+                <td class="py-2 pr-3 text-gray-500 whitespace-nowrap font-mono text-[11px]">${ts}</td>
                 <td class="py-2 pr-3">${triggerBadge}</td>
-                <td class="py-2 pr-3 text-slate-800 font-medium">${escapeHtml(log.action || '-')}</td>
-                <td class="py-2 pr-3 text-slate-600 max-w-xs truncate" title="${escapeHtml(log.details || '')}">${escapeHtml(log.details || '-')}</td>
+                <td class="py-2 pr-3 text-gray-800 font-medium">${escapeHtml(log.action || '-')}</td>
+                <td class="py-2 pr-3 text-gray-600 max-w-xs truncate" title="${escapeHtml(log.details || '')}">${escapeHtml(log.details || '-')}</td>
                 <td class="py-2 text-center">${statusBadge}</td>
               </tr>
             `;
@@ -1482,17 +1458,17 @@ async function loadSavedGardenPlots() {
             nameInput.value = '';
             nameInput.readOnly = false;
             nameInput.disabled = false;
-            nameInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+            nameInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
           }
           if (latInput) {
             latInput.readOnly = false;
             latInput.disabled = false;
-            latInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+            latInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
           }
           if (lonInput) {
             lonInput.readOnly = false;
             lonInput.disabled = false;
-            lonInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+            lonInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
           }
           if (typeof marker !== 'undefined' && marker && marker.dragging) {
             marker.dragging.enable();
@@ -1505,15 +1481,15 @@ async function loadSavedGardenPlots() {
           if (nameInput) {
             nameInput.value = loc.name;
             nameInput.readOnly = true;
-            nameInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+            nameInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
           }
           if (latInput) {
             latInput.readOnly = true;
-            latInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+            latInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
           }
           if (lonInput) {
             lonInput.readOnly = true;
-            lonInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+            lonInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
           }
           
           if (typeof updateLocation === 'function') {
@@ -1568,7 +1544,7 @@ async function initProfileSelector() {
     const base = 'text-sm rounded-lg px-3.5 py-2.5 ';
     messageEl.className = base + (type === 'error'
       ? 'text-red-700 bg-red-50 border border-red-200'
-      : 'text-emerald-700 bg-emerald-50 border border-emerald-200');
+      : 'text-green-700 bg-green-50 border border-green-200');
   }
 
   function clearMessage() {

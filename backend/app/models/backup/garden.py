@@ -59,11 +59,6 @@ class TrackedPlant(Base):
     crop_name = Column(String, nullable=False)
     planted_date = Column(Date, nullable=False)
     pot_size_liters = Column(Float, nullable=False, default=5.0)
-    # How many physical pots this single entry represents (e.g. "15 Tomato
-    # pots" logged as one row instead of 15 separate rows). Existing rows
-    # created before this column existed default to 1 via the DB migration,
-    # so a legacy entry still means exactly "one pot" as it always did.
-    quantity = Column(Integer, nullable=False, default=1)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     location_name = Column(String, nullable=True, default="Home Garden")

@@ -60,17 +60,12 @@ def _build_garden_context(db: Session, scope_user_id: int | None = None) -> str:
         plant_query = plant_query.filter(TrackedPlant.user_id == scope_user_id)
     plants = plant_query.all()
 
-    # Always join to TrackedPlant so alerts belonging to deleted/inactive
-    # plants (soft-deleted via active=False) are never counted, for both
-    # the admin global view and a scoped grower's view.
-    alert_query = (
-        db.query(PlantAlert)
-        .join(TrackedPlant, PlantAlert.plant_id == TrackedPlant.id)
-        .filter(PlantAlert.resolved == False, TrackedPlant.active == True)  # noqa: E712
-    )
+    alert_query = db.query(PlantAlert).filter(PlantAlert.resolved == False)  # noqa: E712
     if scope_user_id is not None:
-        # Further restrict to alerts belonging to this grower's plants.
-        alert_query = alert_query.filter(TrackedPlant.user_id == scope_user_id)
+        # Join to TrackedPlant so alerts are restricted to this grower's plants.
+        alert_query = alert_query.join(
+            TrackedPlant, PlantAlert.plant_id == TrackedPlant.id
+        ).filter(TrackedPlant.user_id == scope_user_id)
     alerts = alert_query.all()
 
     lines: list[str] = []

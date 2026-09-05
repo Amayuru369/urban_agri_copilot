@@ -1,6 +1,12 @@
-import asyncio
+from datetime import datetime, timezone, timedelta
+
+SL_TZ = timezone(timedelta(hours=5, minutes=30))
+
+def get_sl_now():
+    return datetime.now(SL_TZ)
+
+
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
 from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -14,64 +20,158 @@ from backend.app.core.config import settings
 from backend.app.core.database import Base, engine, SessionLocal
 from backend.app.models import garden as _garden_models  # noqa: F401 — ensure models are registered
 from backend.app.models.garden import SystemAuditLog
-from backend.app.routers import chat, crops, diagnose, garden, market, planner, remedy, report, weather
+from backend.app.routers import (
+    auth,
+    chat,
+    crops,
+    diagnose,
+    garden,
+    market,
+    planner,
+    remedy,
+    report,
+    users,
+    weather,
+)
 from backend.app.services.garden_monitor import (
     evaluate_garden_state,
     send_daily_morning_digest,
     send_telegram_alert,
 )
-from backend.app.services.digest_service import send_morning_garden_digest
 from backend.seed_data import seed_all
 
 scheduler = AsyncIOScheduler()
 
 
+def _ensure_user_id_column() -> None:
+    """Lightweight additive migration: add nullable user_id column to tracked_plants
+    if the SQLite table was created before the profile feature was introduced.
+
+    This never drops or alters existing columns, so it is safe to run on every
+    startup and keeps backward compatibility with older databases.
+    """
+    from sqlalchemy import inspect, text
+
+    try:
+        inspector = inspect(engine)
+        if "tracked_plants" not in inspector.get_table_names():
+            return
+        existing_cols = {c["name"] for c in inspector.get_columns("tracked_plants")}
+        if "user_id" in existing_cols:
+            return
+
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE tracked_plants ADD COLUMN user_id INTEGER"))
+        print("[Migration] Added nullable user_id column to tracked_plants.", flush=True)
+    except Exception as exc:
+        # Never crash startup because of an opportunistic migration
+        print(f"[Migration] Skipped user_id column check: {exc}", flush=True)
+
+
+def _ensure_user_auth_columns() -> None:
+    """Lightweight additive migration: add nullable hashed_password and
+    is_admin columns to the users table when it predates the login feature.
+    """
+    from sqlalchemy import inspect, text
+
+    try:
+        inspector = inspect(engine)
+        if "users" not in inspector.get_table_names():
+            return
+        existing_cols = {c["name"] for c in inspector.get_columns("users")}
+
+        statements = []
+        if "hashed_password" not in existing_cols:
+            statements.append("ALTER TABLE users ADD COLUMN hashed_password VARCHAR")
+        if "is_admin" not in existing_cols:
+            statements.append("ALTER TABLE users ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT 0")
+
+        if not statements:
+            return
+
+        with engine.begin() as conn:
+            for stmt in statements:
+                conn.execute(text(stmt))
+        print(f"[Migration] Added auth column(s) to users: {statements}", flush=True)
+    except Exception as exc:
+        print(f"[Migration] Skipped users auth column check: {exc}", flush=True)
+
+
+def _seed_default_admin() -> None:
+    """Create the default admin profile on first startup so a login exists.
+
+    Credentials come from env vars ADMIN_USERNAME / ADMIN_PASSWORD with
+    safe defaults so the app is always reachable in development.
+    """
+    import os
+    from backend.app.core.auth import hash_password
+    from backend.app.models.garden import User
+
+    username = (os.getenv("ADMIN_USERNAME") or "admin").strip()
+    password = os.getenv("ADMIN_PASSWORD") or "admin123"
+
+    db = SessionLocal()
+    try:
+        # Skip if any admin already exists
+        existing_admin = db.query(User).filter(User.is_admin == True).first()  # noqa: E712
+        if existing_admin:
+            return
+
+        # Reuse an existing profile with the same name if present
+        user = db.query(User).filter(User.name.ilike(username)).first()
+        if user:
+            user.hashed_password = hash_password(password)
+            user.is_admin = True
+            db.commit()
+            print(f"[Auth Seed] Promoted existing profile '{user.name}' (id={user.id}) to admin.", flush=True)
+        else:
+            user = User(
+                name=username,
+                hashed_password=hash_password(password),
+                is_admin=True,
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            print(f"[Auth Seed] Created default admin '{username}' (id={user.id}).", flush=True)
+    except Exception as exc:
+        print(f"[Auth Seed] Failed to seed default admin: {exc}", flush=True)
+    finally:
+        db.close()
+
+
 async def _run_garden_monitor(trigger_type: str = "CRON_SCHEDULED"):
     """Wrapper to open a DB session and run the garden evaluation."""
-    print(f"[Scheduler] Triggering garden monitor job ({trigger_type}) now...", flush=True)
+    print(f"[Scheduler - {get_sl_now().strftime('%Y-%m-%d %I:%M:%S %p')}] Triggering garden monitor job ({trigger_type})...", flush=True)
     db = SessionLocal()
     try:
         count = await evaluate_garden_state(db)
-        print(f"[Scheduler] Evaluation finished. Generated {count} alerts.", flush=True)
-
-        action_name = (
-            "Manual Crop & Risk Scan" if trigger_type == "MANUAL" else "Autonomous Crop & Risk Scan"
-        )
+        print(f"[Scheduler - {get_sl_now().strftime('%Y-%m-%d %I:%M:%S %p')}] Evaluation finished. Generated {count} alerts.", flush=True)
+        # Record successful audit entry
         audit = SystemAuditLog(
-            timestamp=datetime.now(timezone.utc),
+            timestamp=get_sl_now(),
             trigger_type=trigger_type,
-            action=action_name,
+            action="Autonomous Crop & Risk Scan",
             details=f"Evaluated active crops. Generated {count or 0} new alert(s).",
             status="SUCCESS",
         )
         db.add(audit)
         db.commit()
 
-        # 1. Dispatch 6:00 AM daily morning digest
+        # Send morning digest only for scheduled cron runs (not on STARTUP)
         if trigger_type == "CRON_SCHEDULED":
             try:
                 await send_daily_morning_digest(db, count or 0)
             except Exception as digest_err:
                 print(f"[Scheduler] Morning digest failed (non-critical): {digest_err}", flush=True)
 
-        # 2. Dispatch Telegram alert on manual green button refresh
-        elif trigger_type == "MANUAL":
-            chat_id = getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
-            if chat_id:
-                msg = (
-                    "🔄 <b>Manual Garden Scan Completed</b>\n\n"
-                    f"• <b>Action:</b> Dashboard refresh requested\n"
-                    f"• <b>New Alerts Generated:</b> {count or 0}\n"
-                    "• <b>Status:</b> Evaluation up to date"
-                )
-                asyncio.create_task(send_telegram_alert(chat_id, msg))
-
     except Exception as e:
         print(f"[Scheduler] Run failed with error: {e}", flush=True)
+        # Record failure audit entry
         audit = SystemAuditLog(
-            timestamp=datetime.now(timezone.utc),
+            timestamp=get_sl_now(),
             trigger_type=trigger_type,
-            action="Crop & Risk Scan",
+            action="Autonomous Crop & Risk Scan",
             details=f"Execution error: {e}",
             status="FAILED",
         )
@@ -84,38 +184,21 @@ async def _run_garden_monitor(trigger_type: str = "CRON_SCHEDULED"):
 async def lifespan(app: FastAPI):
     # --- Startup ---
     Base.metadata.create_all(bind=engine)
+    _ensure_user_id_column()
+    _ensure_user_auth_columns()
     seed_all()
+    _seed_default_admin()
 
-    # 1. Announce system is online first (awaited so it arrives before alerts)
-    chat_id = getattr(settings, "TELEGRAM_DEFAULT_CHAT_ID", None)
-    if chat_id:
-        startup_msg = (
-            "🚀 <b>UrbanAgri-Copilot Online</b>\n\n"
-            "• <b>Status:</b> System initialized & monitoring active\n"
-            "• <b>Daily Scan:</b> Scheduled for 06:00 AM\n"
-            "• <b>Morning Digest:</b> Scheduled for 07:00 AM"
-        )
-        await send_telegram_alert(chat_id, startup_msg)
-
-    # 2. Run evaluation on startup (weather risks & alerts deliver second)
+    # Run once immediately on startup
     await _run_garden_monitor(trigger_type="STARTUP")
 
-    # 3. Run daily at 06:00 AM server time
+    # Run daily at 06:00 AM server time
     scheduler.add_job(
         _run_garden_monitor,
         trigger=CronTrigger(hour=6, minute=0),
         id="garden_monitor_daily",
         replace_existing=True,
     )
-
-    # 4. Send the Daily Morning Garden Digest at 07:00 AM server time
-    scheduler.add_job(
-        send_morning_garden_digest,
-        trigger=CronTrigger(hour=7, minute=0),
-        id="daily_morning_digest",
-        replace_existing=True,
-    )
-
     scheduler.start()
 
     yield
@@ -147,18 +230,10 @@ app.include_router(diagnose.router, prefix="/api")
 app.include_router(remedy.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
 app.include_router(garden.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 
-@app.get("/api/scheduler/jobs")
-def get_scheduled_jobs():
-    return [
-        {
-            "id": job.id,
-            "trigger": str(job.trigger),
-            "next_run_time": str(job.next_run_time),
-        }
-        for job in scheduler.get_jobs()
-    ]
 
 @app.get("/api/health")
 async def health_check():

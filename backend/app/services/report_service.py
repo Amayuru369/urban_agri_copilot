@@ -4,8 +4,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from backend.app.services import remedy_service
-
 try:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
@@ -17,18 +15,19 @@ try:
         Spacer,
         Table,
         TableStyle,
-        KeepTogether,
     )
 
     _HAS_REPORTLAB = True
-except Exception:  # pragma: no cover - reportlab optional
+except Exception:  # pragma: no cover
     _HAS_REPORTLAB = False
 
 
-def _crop_name(crop: Any) -> str:
-    if isinstance(crop, dict):
-        return crop.get("name") or crop.get("scientific_name") or "Unknown crop"
-    return getattr(crop, "name", None) or getattr(crop, "scientific_name", None) or "Unknown crop"
+def _clean_crop_name(name: str) -> str:
+    """Normalize any variations of Chilli / Green Chilli to clean display name."""
+    clean = (name or "").strip()
+    if clean.lower() in ["green chilli", "chilli", "chili", "green chili"]:
+        return "Chillie"
+    return clean
 
 
 def _val(value: Any, fallback: str = "N/A") -> str:
@@ -40,15 +39,8 @@ def _val(value: Any, fallback: str = "N/A") -> str:
 
 
 def _cell(text: str, style: ParagraphStyle, bold: bool = False) -> Paragraph:
-    """Wrap text in a Paragraph so it wraps cleanly inside table cells."""
     content = f"<b>{text}</b>" if bold else text
     return Paragraph(content, style)
-
-
-def _build_remedy_for_diagnosis(diagnosis_data: dict | None) -> dict:
-    if diagnosis_data and diagnosis_data.get("issue_type"):
-        return remedy_service.synthesize_organic_remedy(diagnosis_data["issue_type"])
-    return remedy_service.synthesize_organic_remedy("unknown issue")
 
 
 def _generate_pdf(
@@ -60,191 +52,179 @@ def _generate_pdf(
     doc = SimpleDocTemplate(
         output_path,
         pagesize=A4,
-        rightMargin=2 * cm,
-        leftMargin=2 * cm,
-        topMargin=2 * cm,
-        bottomMargin=2 * cm,
+        rightMargin=1.6 * cm,
+        leftMargin=1.6 * cm,
+        topMargin=1.4 * cm,
+        bottomMargin=1.6 * cm,
     )
+
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        "ReportTitle",
-        parent=styles["Title"],
-        fontSize=20,
-        leading=26,
-        textColor=colors.HexColor("#1a472a"),
-        spaceAfter=6,
+
+    # --- Color Palette ---
+    C_PRIMARY = colors.HexColor("#15803d")       # Emerald 700
+    C_PRIMARY_DARK = colors.HexColor("#14532d")  # Emerald 900
+    C_PRIMARY_LIGHT = colors.HexColor("#f0fdf4") # Emerald 50
+    C_TEXT_MAIN = colors.HexColor("#1f2937")     # Gray 800
+    C_BORDER = colors.HexColor("#e5e7eb")        # Gray 200
+    C_BG_ALT = colors.HexColor("#f9fafb")        # Gray 50
+
+    # --- Typography Styles ---
+    normal_style = ParagraphStyle(
+        "ModernNormal",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=9,
+        leading=13,
+        textColor=C_TEXT_MAIN,
     )
-    heading_style = ParagraphStyle(
-        "ReportHeading",
-        parent=styles["Heading2"],
-        fontSize=14,
-        leading=18,
-        textColor=colors.HexColor("#2c5282"),
-        spaceAfter=8,
-        spaceBefore=12,
+
+    bold_label = ParagraphStyle(
+        "ModernBoldLabel",
+        parent=normal_style,
+        fontName="Helvetica-Bold",
+        textColor=C_TEXT_MAIN,
     )
-    normal_style = styles["Normal"]
-    normal_style.fontSize = 10
-    normal_style.leading = 14
+
+    table_header_style = ParagraphStyle(
+        "TableHeader",
+        parent=normal_style,
+        fontName="Helvetica-Bold",
+        fontSize=8.5,
+        leading=11,
+        textColor=colors.white,
+    )
+
+    table_header_right = ParagraphStyle(
+        "TableHeaderRight",
+        parent=table_header_style,
+        alignment=2,  # Right align with white text
+    )
+
+    cell_right = ParagraphStyle(
+        "CellRight",
+        parent=normal_style,
+        alignment=2,
+    )
+
+    cell_right_bold = ParagraphStyle(
+        "CellRightBold",
+        parent=normal_style,
+        fontName="Helvetica-Bold",
+        alignment=2,
+    )
+
+    section_heading = ParagraphStyle(
+        "SectionHeading",
+        fontName="Helvetica-Bold",
+        fontSize=11,
+        leading=15,
+        textColor=C_PRIMARY_DARK,
+        spaceBefore=10,
+        spaceAfter=5,
+    )
 
     story: list[Any] = []
-    story.append(Paragraph("UrbanAgri-Copilot", title_style))
-    story.append(Paragraph("Garden Health & Action Card Report", heading_style))
-    story.append(Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", normal_style))
-    story.append(Spacer(1, 0.4 * cm))
 
     # ------------------------------------------------------------------
-    # Agro-Climatic Plan summary
+    # 1. Executive Header Banner
     # ------------------------------------------------------------------
-    story.append(Paragraph("1. Agro-Climatic Plan Summary", heading_style))
-    location = plan_data.get("location") or {}
-    plan_rows = [
-        [_cell("Location", normal_style, bold=True), _cell(f"Lat {_val(location.get('lat'))}, Lon {_val(location.get('lon'))}", normal_style)],
-        [_cell("Container", normal_style, bold=True), _cell(_val(plan_data.get("container_type")), normal_style)],
-        [_cell("Space", normal_style, bold=True), _cell(f"{_val(plan_data.get('space_sqm'))} m²", normal_style)],
-        [_cell("Target month", normal_style, bold=True), _cell(_val(plan_data.get("target_month")), normal_style)],
+    header_content = [
+        [
+            Paragraph(
+                "<font size='18'><b>UrbanAgri-Copilot</b></font><br/>"
+                "<font size='9' color='#bbf7d0'>Smart Agro-Climatic Planning &amp; Harvest Economics</font>",
+                ParagraphStyle("BrandHead", fontName="Helvetica", textColor=colors.white, leading=16),
+            ),
+            Paragraph(
+                f"<font size='8' color='#dcfce7'>GARDEN ACTION CARD REPORT</font><br/>"
+                f"<font size='8' color='#ffffff'>Generated: <b>{datetime.now().strftime('%Y-%m-%d %H:%M')}</b></font>",
+                ParagraphStyle("BrandMeta", fontName="Helvetica", textColor=colors.white, alignment=2, leading=13),
+            ),
+        ]
     ]
-    forecast = plan_data.get("forecast_summary") or {}
-    if forecast:
-        plan_rows.append([_cell("Avg min temp", normal_style, bold=True), _cell(f"{_val(forecast.get('avg_min_temp_c'))} °C", normal_style)])
-        plan_rows.append([_cell("Avg max temp", normal_style, bold=True), _cell(f"{_val(forecast.get('avg_max_temp_c'))} °C", normal_style)])
-        plan_rows.append([_cell("Avg daylight", normal_style, bold=True), _cell(f"{_val(forecast.get('avg_daylight_hours'))} h/day", normal_style)])
-
-    plan_table = Table(plan_rows, colWidths=[130, 340])
-    plan_table.setStyle(
+    header_table = Table(header_content, colWidths=[310, 200])
+    header_table.setStyle(
         TableStyle([
-            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#edf2f7")),
-            ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
-            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("BACKGROUND", (0, 0), (-1, -1), C_PRIMARY_DARK),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-            ("TOPPADDING", (0, 0), (-1, -1), 6),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 12),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+            ("LEFTPADDING", (0, 0), (-1, -1), 14),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 14),
         ])
     )
-    story.append(plan_table)
-    story.append(Spacer(1, 0.4 * cm))
+    story.append(header_table)
+    story.append(Spacer(1, 0.35 * cm))
 
-    recommendations = plan_data.get("recommendations") or []
-    if recommendations:
-        story.append(Paragraph("Top crop recommendations", heading_style))
-        rec_rows = [
+    # ------------------------------------------------------------------
+    # 2. Estimated Grocery Savings (Executive Financial Table)
+    # ------------------------------------------------------------------
+    story.append(Paragraph("Projected Harvest Economics &amp; Savings", section_heading))
+
+    savings_items = savings_data.get("items") or []
+    currency = savings_data.get("currency", "LKR")
+
+    if savings_items:
+        savings_rows = [
             [
-                _cell("Crop", normal_style, bold=True),
-                _cell("Score", normal_style, bold=True),
-                _cell("Layout", normal_style, bold=True),
-                _cell("Notes", normal_style, bold=True),
+                Paragraph("CROP", table_header_style),
+                Paragraph("PROJECTED YIELD", table_header_right),
+                Paragraph("MARKET RETAIL", table_header_right),
+                Paragraph("GROCERY SAVINGS", table_header_right),
             ]
         ]
-        for rec in recommendations[:5]:
-            crop_name = _crop_name(rec.get("crop") if isinstance(rec, dict) else getattr(rec, "crop", None))
-            score = _val(rec.get("suitability_score") if isinstance(rec, dict) else getattr(rec, "suitability_score", None))
-            layout = _val(rec.get("layout") if isinstance(rec, dict) else getattr(rec, "layout", None))
-            notes = _val(rec.get("notes") if isinstance(rec, dict) else getattr(rec, "notes", None), "")
-            rec_rows.append([
-                _cell(crop_name, normal_style),
-                _cell(score, normal_style),
-                _cell(layout, normal_style),
-                _cell(notes, normal_style),
+
+        total_savings = 0.0
+        for item in savings_items:
+            crop_name = _clean_crop_name(_val(item.get("crop_name")))
+            yield_val = f"{float(item.get('expected_yield_kg', 0)):.2f} kg"
+            price_val = f"{float(item.get('retail_price_per_kg', 0)):,.2f} {currency}/kg"
+            sav_num = float(item.get("estimated_savings", 0))
+            total_savings += sav_num
+            sav_val = f"{sav_num:,.2f} {currency}"
+
+            savings_rows.append([
+                _cell(crop_name, normal_style, bold=True),
+                _cell(yield_val, cell_right),
+                _cell(price_val, cell_right),
+                _cell(sav_val, cell_right_bold),
             ])
 
-        rec_table = Table(rec_rows, colWidths=[80, 45, 140, 200])
-        rec_table.setStyle(
+        # Grand Total Highlight Ribbon
+        savings_rows.append([
+            _cell("<b>TOTAL PROJECTED SAVINGS</b>", bold_label),
+            _cell("", normal_style),
+            _cell("", normal_style),
+            _cell(f"<b>{total_savings:,.2f} {currency}</b>", ParagraphStyle(
+                "BigTotal", parent=cell_right_bold, fontSize=10, textColor=C_PRIMARY_DARK
+            )),
+        ])
+
+        savings_table = Table(savings_rows, colWidths=[150, 110, 125, 125])
+        savings_table.setStyle(
             TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c5282")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-                ("FONTSIZE", (0, 0), (-1, -1), 9),
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                ("LEFTPADDING", (0, 0), (-1, -1), 5),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+                ("BACKGROUND", (0, 0), (-1, 0), C_PRIMARY_DARK),
+                ("BOX", (0, 0), (-1, -1), 0.5, C_BORDER),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("TOPPADDING", (0, 0), (-1, -1), 5),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f7fafc")]),
+                ("LEFTPADDING", (0, 0), (-1, -1), 7),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+                ("ROWBACKGROUNDS", (0, 1), (-2, -1), [colors.white, C_BG_ALT]),
+                ("LINEBELOW", (0, 1), (-1, -2), 0.5, colors.HexColor("#f3f4f6")),
+                ("BACKGROUND", (0, -1), (-1, -1), C_PRIMARY_LIGHT),
+                ("LINEABOVE", (0, -1), (-1, -1), 1.2, C_PRIMARY),
             ])
         )
-        story.append(rec_table)
-        story.append(Spacer(1, 0.4 * cm))
+        story.append(savings_table)
 
-    # ------------------------------------------------------------------
-    # Leaf Health Pathology status
-    # ------------------------------------------------------------------
-    story.append(Paragraph("2. Leaf Health Pathology Status", heading_style))
-    if diagnosis_data:
-        diag_rows = [
-            [_cell("Crop detected", normal_style, bold=True), _cell(_val(diagnosis_data.get("crop_detected")), normal_style)],
-            [_cell("Issue", normal_style, bold=True), _cell(_val(diagnosis_data.get("issue_type")), normal_style)],
-            [_cell("Confidence", normal_style, bold=True), _cell(_val(diagnosis_data.get("confidence")), normal_style)],
-            [_cell("Severity", normal_style, bold=True), _cell(_val(diagnosis_data.get("severity")), normal_style)],
-            [_cell("Symptoms", normal_style, bold=True), _cell(", ".join(diagnosis_data.get("symptoms", [])) or "N/A", normal_style)],
-            [_cell("Recommended action", normal_style, bold=True), _cell(_val(diagnosis_data.get("recommended_action")), normal_style)],
-        ]
-        diag_table = Table(diag_rows, colWidths=[130, 340])
-        diag_table.setStyle(
-            TableStyle([
-                ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#edf2f7")),
-                ("FONTSIZE", (0, 0), (-1, -1), 10),
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                ("LEFTPADDING", (0, 0), (-1, -1), 6),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-            ])
+    story.append(Spacer(1, 0.4 * cm))
+    story.append(
+        Paragraph(
+            "<font size='7.5' color='#9ca3af'>* Estimated grocery savings calculated based on official weekly open market indices published in Sri Lanka. Actual container yields may vary depending on local microclimates and pest control adherence.</font>",
+            normal_style
         )
-        story.append(diag_table)
-    else:
-        story.append(Paragraph("No diagnosis provided.", normal_style))
-    story.append(Spacer(1, 0.4 * cm))
-
-    # ------------------------------------------------------------------
-    # Step-by-Step Organic Kitchen Remedy
-    # ------------------------------------------------------------------
-    story.append(Paragraph("3. Step-by-Step Organic Kitchen Remedy", heading_style))
-    recipe = _build_remedy_for_diagnosis(diagnosis_data)
-    story.append(Paragraph(f"<b>{recipe['remedy_name']}</b>", normal_style))
-    story.append(Spacer(1, 0.2 * cm))
-    story.append(Paragraph("<b>Ingredients:</b>", normal_style))
-    for ingredient in recipe.get("ingredients", []):
-        story.append(Paragraph(f"• {ingredient}", normal_style))
-    story.append(Spacer(1, 0.2 * cm))
-    story.append(Paragraph("<b>Preparation:</b>", normal_style))
-    for idx, step in enumerate(recipe.get("preparation_steps", []), start=1):
-        story.append(Paragraph(f"{idx}. {step}", normal_style))
-    story.append(Spacer(1, 0.2 * cm))
-    story.append(Paragraph(f"<b>Application schedule:</b> {recipe.get('application_schedule', 'N/A')}", normal_style))
-    story.append(Spacer(1, 0.2 * cm))
-    story.append(Paragraph("<b>Safety notes:</b>", normal_style))
-    for note in recipe.get("safety_notes", []):
-        story.append(Paragraph(f"• {note}", normal_style))
-    story.append(Spacer(1, 0.4 * cm))
-
-    # ------------------------------------------------------------------
-    # Estimated Grocery Savings
-    # ------------------------------------------------------------------
-    story.append(Paragraph("4. Estimated Grocery Savings", heading_style))
-    savings_rows = [
-        [_cell("Crop", normal_style, bold=True), _cell(_val(savings_data.get("crop_name")), normal_style)],
-        [_cell("Expected yield", normal_style, bold=True), _cell(f"{_val(savings_data.get('expected_yield_kg'))} kg", normal_style)],
-        [_cell("Retail price", normal_style, bold=True), _cell(f"{_val(savings_data.get('retail_price_per_kg'))} {savings_data.get('currency', 'LKR')}/kg", normal_style)],
-        [_cell("Estimated savings", normal_style, bold=True), _cell(f"{_val(savings_data.get('estimated_savings'))} {savings_data.get('currency', 'LKR')}", normal_style)],
-    ]
-    savings_table = Table(savings_rows, colWidths=[130, 340])
-    savings_table.setStyle(
-        TableStyle([
-            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#edf2f7")),
-            ("FONTSIZE", (0, 0), (-1, -1), 10),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-            ("TOPPADDING", (0, 0), (-1, -1), 6),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-        ])
     )
-    story.append(savings_table)
 
     doc.build(story)
     return output_path
@@ -256,91 +236,32 @@ def _generate_markdown(
     savings_data: dict,
     output_path: str,
 ) -> str:
-    recipe = _build_remedy_for_diagnosis(diagnosis_data)
-    location = plan_data.get("location") or {}
-    forecast = plan_data.get("forecast_summary") or {}
-    recommendations = plan_data.get("recommendations") or []
-
     lines = [
         "# UrbanAgri-Copilot Garden Health & Action Card Report",
         "",
         f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         "",
-        "## 1. Agro-Climatic Plan Summary",
-        "",
-        f"- **Location:** Lat {_val(location.get('lat'))}, Lon {_val(location.get('lon'))}",
-        f"- **Container:** {_val(plan_data.get('container_type'))}",
-        f"- **Space:** {_val(plan_data.get('space_sqm'))} m²",
-        f"- **Target month:** {_val(plan_data.get('target_month'))}",
-        f"- **Avg min temp:** {_val(forecast.get('avg_min_temp_c'))} °C",
-        f"- **Avg max temp:** {_val(forecast.get('avg_max_temp_c'))} °C",
-        f"- **Avg daylight:** {_val(forecast.get('avg_daylight_hours'))} h/day",
-        "",
     ]
-
-    if recommendations:
-        lines.append("### Top crop recommendations")
-        lines.append("")
-        for rec in recommendations[:5]:
-            crop_obj = rec.get("crop") if isinstance(rec, dict) else getattr(rec, "crop", None)
-            crop_name = _crop_name(crop_obj)
-            score = _val(rec.get("suitability_score") if isinstance(rec, dict) else getattr(rec, "suitability_score", None))
-            layout = _val(rec.get("layout") if isinstance(rec, dict) else getattr(rec, "layout", None))
-            notes = _val(rec.get("notes") if isinstance(rec, dict) else getattr(rec, "notes", None), "")
-            lines.append(f"- **{crop_name}** (score {score}) — {layout}. {notes}")
-        lines.append("")
-
-    lines.extend([
-        "## 2. Leaf Health Pathology Status",
-        "",
-    ])
-    if diagnosis_data:
+    savings_items = savings_data.get("items")
+    if savings_items:
+        currency = savings_data.get("currency", "LKR")
         lines.extend([
-            f"- **Crop detected:** {_val(diagnosis_data.get('crop_detected'))}",
-            f"- **Issue:** {_val(diagnosis_data.get('issue_type'))}",
-            f"- **Confidence:** {_val(diagnosis_data.get('confidence'))}",
-            f"- **Severity:** {_val(diagnosis_data.get('severity'))}",
-            f"- **Symptoms:** {', '.join(diagnosis_data.get('symptoms', [])) or 'N/A'}",
-            f"- **Recommended action:** {_val(diagnosis_data.get('recommended_action'))}",
+            "## Estimated Grocery Savings",
             "",
         ])
-    else:
-        lines.extend(["No diagnosis provided.", ""])
+        for item in savings_items:
+            item_currency = item.get("currency", currency)
+            lines.append(
+                f"- **{_clean_crop_name(_val(item.get('crop_name')))}:** {_val(item.get('expected_yield_kg'))} kg "
+                f"@ {_val(item.get('retail_price_per_kg'))} {item_currency}/kg → "
+                f"{_val(item.get('estimated_savings'))} {item_currency}"
+            )
+        total_savings = savings_data.get("total_estimated_savings")
+        if total_savings is None:
+            total_savings = sum((item.get("estimated_savings") or 0) for item in savings_items)
+        lines.append(f"- **Grand total estimated savings:** {_val(total_savings)} {currency}")
+        lines.append("")
 
-    lines.extend([
-        "## 3. Step-by-Step Organic Kitchen Remedy",
-        "",
-        f"### {recipe['remedy_name']}",
-        "",
-        "**Ingredients:**",
-        "",
-    ])
-    for ingredient in recipe.get("ingredients", []):
-        lines.append(f"- {ingredient}")
-    lines.extend(["", "**Preparation:**", ""])
-    for idx, step in enumerate(recipe.get("preparation_steps", []), start=1):
-        lines.append(f"{idx}. {step}")
-    lines.extend([
-        "",
-        f"**Application schedule:** {recipe.get('application_schedule', 'N/A')}",
-        "",
-        "**Safety notes:**",
-        "",
-    ])
-    for note in recipe.get("safety_notes", []):
-        lines.append(f"- {note}")
-    lines.extend([
-        "",
-        "## 4. Estimated Grocery Savings",
-        "",
-        f"- **Crop:** {_val(savings_data.get('crop_name'))}",
-        f"- **Expected yield:** {_val(savings_data.get('expected_yield_kg'))} kg",
-        f"- **Retail price:** {_val(savings_data.get('retail_price_per_kg'))} {savings_data.get('currency', 'LKR')}/kg",
-        f"- **Estimated savings:** {_val(savings_data.get('estimated_savings'))} {savings_data.get('currency', 'LKR')}",
-        "",
-    ])
-
-    # Ensure the fallback file is saved as markdown for clarity.
     path = Path(output_path)
     if path.suffix.lower() == ".pdf":
         path = path.with_suffix(".md")
@@ -355,11 +276,6 @@ def generate_garden_report(
     savings_data: dict,
     output_path: str = "garden_report.pdf",
 ) -> str:
-    """Generate a structured Garden Health & Action Card report.
-
-    If `reportlab` is available, a PDF is produced. Otherwise a clean markdown
-    Action Card is written and its path is returned.
-    """
     if _HAS_REPORTLAB:
         return _generate_pdf(plan_data, diagnosis_data, savings_data, output_path)
     return _generate_markdown(plan_data, diagnosis_data, savings_data, output_path)
