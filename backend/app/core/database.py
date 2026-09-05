@@ -2,12 +2,16 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Hardcoded safe SQLite path for Vercel's writable temp directory
-DATABASE_URL = "sqlite:////tmp/urban_agri.db"
+from backend.app.core.config import settings
+
+DATABASE_URL = settings.DATABASE_URL
+
+# SQLite needs check_same_thread=False; Postgres does not accept/need it.
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    connect_args=connect_args,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
