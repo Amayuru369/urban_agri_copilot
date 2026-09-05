@@ -1,3 +1,10 @@
+from datetime import datetime, timezone, timedelta
+
+SL_TZ = timezone(timedelta(hours=5, minutes=30))
+
+def get_sl_now():
+    return datetime.now(SL_TZ)
+
 
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -13,18 +20,24 @@ from backend.app.core.config import settings
 from backend.app.core.database import Base, engine, SessionLocal
 from backend.app.models import garden as _garden_models  # noqa: F401 — ensure models are registered
 from backend.app.models.garden import SystemAuditLog
-<<<<<<< Updated upstream
-from backend.app.routers import crops, diagnose, garden, market, planner, remedy, report, weather
-from backend.app.services.garden_monitor import evaluate_garden_state, send_daily_morning_digest
-=======
-from backend.app.routers import auth, chat, crops, diagnose, garden, market, planner, remedy, report, users, weather
+from backend.app.routers import (
+    auth,
+    chat,
+    crops,
+    diagnose,
+    garden,
+    market,
+    planner,
+    remedy,
+    report,
+    users,
+    weather,
+)
 from backend.app.services.garden_monitor import (
     evaluate_garden_state,
     send_daily_morning_digest,
     send_telegram_alert,
 )
-from backend.app.services.digest_service import send_morning_garden_digest
->>>>>>> Stashed changes
 from backend.seed_data import seed_all
 
 scheduler = AsyncIOScheduler()
@@ -129,13 +142,14 @@ def _seed_default_admin() -> None:
 
 async def _run_garden_monitor(trigger_type: str = "CRON_SCHEDULED"):
     """Wrapper to open a DB session and run the garden evaluation."""
-    print("[Scheduler] Triggering garden monitor job now...", flush=True)
+    print(f"[Scheduler - {get_sl_now().strftime('%Y-%m-%d %I:%M:%S %p')}] Triggering garden monitor job ({trigger_type})...", flush=True)
     db = SessionLocal()
     try:
         count = await evaluate_garden_state(db)
-        print(f"[Scheduler] Evaluation finished. Generated {count} alerts.", flush=True)
+        print(f"[Scheduler - {get_sl_now().strftime('%Y-%m-%d %I:%M:%S %p')}] Evaluation finished. Generated {count} alerts.", flush=True)
         # Record successful audit entry
         audit = SystemAuditLog(
+            timestamp=get_sl_now(),
             trigger_type=trigger_type,
             action="Autonomous Crop & Risk Scan",
             details=f"Evaluated active crops. Generated {count or 0} new alert(s).",
@@ -155,6 +169,7 @@ async def _run_garden_monitor(trigger_type: str = "CRON_SCHEDULED"):
         print(f"[Scheduler] Run failed with error: {e}", flush=True)
         # Record failure audit entry
         audit = SystemAuditLog(
+            timestamp=get_sl_now(),
             trigger_type=trigger_type,
             action="Autonomous Crop & Risk Scan",
             details=f"Execution error: {e}",
@@ -215,12 +230,9 @@ app.include_router(diagnose.router, prefix="/api")
 app.include_router(remedy.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
 app.include_router(garden.router, prefix="/api")
-<<<<<<< Updated upstream
-=======
 app.include_router(users.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
->>>>>>> Stashed changes
 
 
 @app.get("/api/health")

@@ -39,7 +39,6 @@ class PlantCreate(BaseModel):
     crop_name: str = Field(..., examples=["Tomato"])
     planted_date: date = Field(..., description="Date the plant was sown or transplanted")
     pot_size_liters: float = Field(default=5.0, ge=0.5, le=200.0)
-    quantity: int = Field(default=1, ge=1, le=1000, description="Number of pots this entry represents")
     latitude: float = Field(..., ge=-90, le=90)
     longitude: float = Field(..., ge=-180, le=180)
     location_name: str | None = Field(default="Home Garden", description="District or garden nickname")
@@ -53,7 +52,6 @@ class PlantResponse(BaseModel):
     crop_name: str
     planted_date: date
     pot_size_liters: float
-    quantity: int
     latitude: float
     longitude: float
     location_name: str | None
@@ -133,7 +131,6 @@ async def create_plant(
         crop_name=payload.crop_name,
         planted_date=payload.planted_date,
         pot_size_liters=payload.pot_size_liters,
-        quantity=payload.quantity,
         latitude=payload.latitude,
         longitude=payload.longitude,
         location_name=(payload.location_name.strip() if payload.location_name and payload.location_name.strip() else "Home Garden"),
@@ -156,7 +153,6 @@ async def create_plant(
         "crop_name": plant.crop_name,
         "planted_date": plant.planted_date.isoformat(),
         "user_id": plant.user_id,
-        "quantity": plant.quantity,
         "message": "Plant registered successfully.",
     }
 
@@ -235,7 +231,6 @@ async def get_dashboard(
             "crop_name": plant.crop_name,
             "planted_date": plant.planted_date.isoformat(),
             "pot_size_liters": plant.pot_size_liters,
-            "quantity": getattr(plant, "quantity", 1) or 1,
             "latitude": plant.latitude,
             "longitude": plant.longitude,
             "location_name": getattr(plant, "location_name", "Home Garden"),
@@ -250,7 +245,6 @@ async def get_dashboard(
     return {
         "evaluated_on": today.isoformat(),
         "active_plants": len(dashboard),
-        "total_pot_count": sum(p["quantity"] for p in dashboard),
         "scoped_user_id": scope_user_id,
         "plants": dashboard,
     }

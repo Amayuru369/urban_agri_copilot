@@ -4,62 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UrbanAgri-Copilot Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      letter-spacing: -0.011em;
-    }
-    /* Sleek underline-accent tab navigation with smooth active state */
-    .tab-btn {
-      position: relative;
-      transition: color .2s ease, background-color .2s ease;
-    }
-    .tab-btn::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      height: 3px;
-      width: 0;
-      border-radius: 9999px 9999px 0 0;
-      background: linear-gradient(90deg, #059669, #10b981);
-      transform: translateX(-50%);
-      transition: width .28s cubic-bezier(.4,0,.2,1);
-    }
     .tab-btn.active {
-      color: #047857;
+      border-bottom: 3px solid #15803d;
+      color: #15803d;
       font-weight: 600;
-      background-color: #ecfdf5;
     }
-    .tab-btn.active::after { width: 55%; }
-    /* Emerald accent for native range sliders */
-    input[type="range"] { accent-color: #059669; }
-    /* Slim, modern horizontal scrollbars for the weather/timeline strips */
-    .thin-scroll::-webkit-scrollbar { height: 8px; }
-    .thin-scroll::-webkit-scrollbar-track { background: transparent; }
-    .thin-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 9999px; }
-    .thin-scroll::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
-  <header class="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-green-900 to-emerald-800 text-white shadow-lg shadow-emerald-900/10">
-    <div class="absolute inset-0 opacity-[0.06] pointer-events-none" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 22px 22px;"></div>
-    <div class="relative max-w-screen-2xl mx-auto px-6 py-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div class="flex items-center gap-3.5">
-        <div class="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 backdrop-blur text-2xl shadow-inner">🌿</div>
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">UrbanAgri-Copilot</h1>
-          <p class="text-emerald-100/90 text-sm mt-1 font-medium">Smart planning, diagnosis, and harvest economics for Sri Lankan urban growers</p>
-        </div>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+  <header class="bg-green-900 text-white shadow">
+    <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">UrbanAgri-Copilot</h1>
+        <p class="text-green-100 text-sm mt-1">Smart planning, diagnosis, and harvest economics for Sri Lankan urban growers</p>
       </div>
 
       <!-- Auth state container (mirrors garden.html). Populated by JS below. -->
@@ -67,22 +28,22 @@
         <!-- Signed-out fallback (replaced by JS when a token is present) -->
         <a id="signin-btn"
            href="/login.html"
-           class="inline-flex items-center gap-1.5 text-xs font-semibold bg-white text-emerald-900 hover:bg-emerald-50 px-4 py-2.5 rounded-lg shadow-sm ring-1 ring-white/20 transition-all duration-200 hover:-translate-y-0.5">
+           class="inline-flex items-center gap-1.5 text-xs font-semibold bg-white text-green-900 hover:bg-green-50 border border-green-100 px-3 py-2 rounded-md transition">
           Sign In
         </a>
 
         <!-- Signed-in badge (hidden until JS confirms a session) -->
         <div id="auth-badge" class="hidden items-center gap-2">
-          <div class="text-right leading-tight pl-3 border-l border-white/20">
+          <div class="text-right leading-tight pl-2 border-l border-green-700/60">
             <p id="auth-badge-name" class="text-xs font-semibold text-white max-w-[160px] truncate">—</p>
-            <p id="auth-badge-role" class="text-[10px] font-bold uppercase tracking-wider text-emerald-200">—</p>
+            <p id="auth-badge-role" class="text-[10px] font-bold uppercase tracking-wider text-green-200">—</p>
           </div>
           <button id="auth-settings-btn" type="button" title="Profile settings"
-                  class="text-xs font-medium text-emerald-50 hover:text-white bg-white/10 hover:bg-white/20 ring-1 ring-white/15 px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5">
+                  class="text-xs font-medium text-green-100 hover:text-white bg-green-800 hover:bg-green-700 border border-green-700 px-2.5 py-1.5 rounded-md transition flex items-center gap-1">
             <span>⚙️</span><span class="hidden sm:inline">Settings</span>
           </button>
           <button id="auth-logout-btn" type="button" title="Sign out"
-                  class="text-xs font-medium text-emerald-50 hover:text-white bg-white/10 hover:bg-red-500/90 ring-1 ring-white/15 hover:ring-red-400/40 px-3 py-2 rounded-lg transition-all duration-200">
+                  class="text-xs font-medium text-green-100 hover:text-white bg-green-800 hover:bg-red-700 border border-green-700 hover:border-red-600 px-2.5 py-1.5 rounded-md transition">
             Logout
           </button>
         </div>
@@ -90,43 +51,42 @@
     </div>
   </header>
 
-  <main class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-8">
-    <nav class="bg-white rounded-xl shadow-sm border border-slate-100 mb-8 flex overflow-x-auto thin-scroll">
-      <button data-tab="planner" class="tab-btn active flex-1 px-5 py-3.5 text-sm md:text-base font-medium text-slate-500 hover:text-emerald-700 hover:bg-emerald-50/40 whitespace-nowrap transition-colors duration-200">
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <nav class="bg-white rounded-lg shadow mb-6 flex overflow-x-auto">
+      <button data-tab="planner" class="tab-btn active flex-1 px-4 py-3 text-sm md:text-base text-gray-600 hover:bg-gray-50 whitespace-nowrap">
         Agro-Climatic Balcony Planner
       </button>
-      <button data-tab="doctor" class="tab-btn flex-1 px-5 py-3.5 text-sm md:text-base font-medium text-slate-500 hover:text-emerald-700 hover:bg-emerald-50/40 whitespace-nowrap transition-colors duration-200">
+      <button data-tab="doctor" class="tab-btn flex-1 px-4 py-3 text-sm md:text-base text-gray-600 hover:bg-gray-50 whitespace-nowrap">
         AI Leaf Doctor &amp; Kitchen Remedy
       </button>
-      <button data-tab="economics" class="tab-btn flex-1 px-5 py-3.5 text-sm md:text-base font-medium text-slate-500 hover:text-emerald-700 hover:bg-emerald-50/40 whitespace-nowrap transition-colors duration-200">
+      <button data-tab="economics" class="tab-btn flex-1 px-4 py-3 text-sm md:text-base text-gray-600 hover:bg-gray-50 whitespace-nowrap">
         Harvest Economics &amp; PDF Export
       </button>
       <!-- Cross-page navigation (does NOT participate in the tab system) -->
       <a href="/garden.html"
-         class="shrink-0 inline-flex items-center gap-2 px-5 py-3.5 text-sm md:text-base font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-l border-slate-100 whitespace-nowrap transition-colors duration-200"
+         class="shrink-0 inline-flex items-center gap-1.5 px-4 py-3 text-sm md:text-base font-semibold text-green-800 bg-green-50 hover:bg-green-100 border-l border-green-200 whitespace-nowrap transition"
          title="Open the Plant Monitor & Garden dashboard">
-        <span>🌱</span> Plant Monitor &amp; Garden <span class="text-emerald-400">↗</span>
+        🌱 Plant Monitor &amp; Garden
       </a>
     </nav>
 
     <!-- Planner Tab -->
     <section id="planner" class="tab-content space-y-6">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
-        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Plan your balcony or terrace garden</h2>
-        <p class="text-sm text-slate-500 mt-1 mb-6">Tell us about your space and target season — we'll rank the crops that thrive on your balcony.</p>
-        <form id="planner-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="bg-white rounded-lg shadow p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-green-900 mb-4">Plan your balcony or terrace garden</h2>
+        <form id="planner-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Latitude</label>
-            <input id="lat" type="number" step="any" required value="6.9271" class="w-full rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+            <input id="lat" type="number" step="any" required value="6.9271" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Longitude</label>
-            <input id="lon" type="number" step="any" required value="79.8612" class="w-full rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+            <input id="lon" type="number" step="any" required value="79.8612" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2" />
           </div>
           <div class="md:col-span-2">
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">District / Location</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">District / Location</label>
             <div class="flex flex-wrap gap-2">
-              <select id="districtSelect" class="flex-1 min-w-[12rem] rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+              <select id="districtSelect" class="flex-1 min-w-[12rem] rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
                 <option value="">Select district...</option>
                 <option value="6.9271,79.8612">Colombo</option>
                 <option value="7.0917,79.9997">Gampaha</option>
@@ -154,13 +114,13 @@
                 <option value="6.7056,80.3847">Ratnapura</option>
                 <option value="7.2513,80.3464">Kegalle</option>
               </select>
-              <button type="button" id="currentLocationBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 px-3.5 rounded-lg border border-slate-200 transition-all duration-200 hover:-translate-y-0.5">📍 Current</button>
-              <button type="button" id="pickOnMapBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 px-3.5 rounded-lg border border-slate-200 transition-all duration-200 hover:-translate-y-0.5">🗺️ Pick on Map</button>
+              <button type="button" id="currentLocationBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-3 rounded-md transition">📍 Current</button>
+              <button type="button" id="pickOnMapBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-3 rounded-md transition">🗺️ Pick on Map</button>
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Container type</label>
-            <select id="container_type" class="w-full rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Container type</label>
+            <select id="container_type" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
               <option value="Pot">Pot</option>
               <option value="Raised Bed">Raised Bed</option>
               <option value="Vertical Tower">Vertical Tower</option>
@@ -168,36 +128,36 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Space</label>
-            <div class="flex items-center gap-2 mb-2.5">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Space</label>
+            <div class="flex items-center gap-2 mb-2">
               <button type="button" id="space-mode-area" class="text-xs px-2 py-1 rounded-md bg-green-700 text-white font-medium transition">Total Area</button>
               <button type="button" id="space-mode-dims" class="text-xs px-2 py-1 rounded-md bg-gray-200 text-gray-700 font-medium transition">Dimensions</button>
             </div>
             <!-- Area mode -->
             <div id="space-area-input">
               <div class="flex items-center gap-2">
-                <input id="space_sqm" type="number" step="0.1" min="0.1" max="50" required value="2" placeholder="e.g. 5.0" class="flex-1 rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-2.5 rounded-lg whitespace-nowrap">m²</span>
+                <input id="space_sqm" type="number" step="0.1" min="0.1" max="50" required value="2" placeholder="e.g. 5.0" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2" />
+                <span class="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-md whitespace-nowrap">m²</span>
               </div>
-              <p class="text-xs text-slate-500 mt-1.5">Enter floor area in square meters (m²).</p>
+              <p class="text-xs text-gray-500 mt-1">Enter floor area in square meters (m²).</p>
             </div>
             <!-- Dimensions mode -->
             <div id="space-dims-input" class="hidden">
               <div class="flex gap-2">
-                <input id="space-length" type="number" step="0.1" min="0.1" max="200" placeholder="Length" class="flex-1 rounded-lg border border-slate-300 shadow-sm px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                <input id="space-width" type="number" step="0.1" min="0.1" max="200" placeholder="Width" class="flex-1 rounded-lg border border-slate-300 shadow-sm px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                <select id="space-unit" class="rounded-lg border border-slate-300 shadow-sm px-2.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+                <input id="space-length" type="number" step="0.1" min="0.1" max="200" placeholder="Length" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2 text-sm" />
+                <input id="space-width" type="number" step="0.1" min="0.1" max="200" placeholder="Width" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2 text-sm" />
+                <select id="space-unit" class="rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-2 py-2 text-sm">
                   <option value="m">m</option>
                   <option value="cm">cm</option>
                   <option value="ft">ft</option>
                 </select>
               </div>
-              <p id="space-dims-result" class="text-xs text-slate-500 mt-1.5"></p>
+              <p id="space-dims-result" class="text-xs text-gray-500 mt-1"></p>
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Target month</label>
-            <select id="target_month" class="w-full rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Target month</label>
+            <select id="target_month" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
               <option value="1">January</option>
               <option value="2">February</option>
               <option value="3">March</option>
@@ -213,39 +173,39 @@
             </select>
           </div>
           <div class="md:col-span-2 lg:col-span-2 flex items-end">
-            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-semibold py-3 px-5 rounded-lg shadow-md shadow-emerald-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-600/30 active:translate-y-0">Generate Crop Plan</button>
+            <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition">Generate Crop Plan</button>
           </div>
         </form>
-        <div id="mapContainer" class="hidden mt-5 border border-slate-200 rounded-xl overflow-hidden h-72 shadow-inner"></div>
+        <div id="mapContainer" class="hidden my-3 border border-gray-300 rounded-lg overflow-hidden h-72"></div>
       </div>
 
-      <div id="planner-result" class="hidden bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
-        <h3 class="text-base font-bold text-slate-800 tracking-tight mb-4">Recommended plan</h3>
-        <div id="planner-summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 text-sm"></div>
+      <div id="planner-result" class="hidden bg-white rounded-lg shadow p-5 md:p-6">
+        <h3 class="text-md font-semibold text-gray-800 mb-3">Recommended plan</h3>
+        <div id="planner-summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 text-sm"></div>
         
         <!-- Weather Forecast Panel -->
-        <div id="weather-panel" class="hidden mb-6 rounded-xl border border-slate-100 bg-slate-50/60 p-4 md:p-5">
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h4 id="weather-panel-heading" class="text-sm font-bold text-slate-700 tracking-tight">Weather Outlook</h4>
+        <div id="weather-panel" class="hidden mb-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <h4 id="weather-panel-heading" class="text-sm font-semibold text-gray-700">Weather Outlook</h4>
             <div class="flex items-center gap-2">
               <button type="button" id="weather-view-7day" class="text-xs px-3 py-1 rounded-md bg-green-700 text-white font-medium transition">7-Day Daily</button>
               <button type="button" id="weather-view-4week" class="text-xs px-3 py-1 rounded-md bg-gray-200 text-gray-700 font-medium transition">Crop Growth Timeline</button>
             </div>
           </div>
           <!-- Focus Crop Selector (for timeline) -->
-          <div id="focus-crop-bar" class="hidden mb-4 bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+          <div id="focus-crop-bar" class="hidden mb-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
             <div class="flex flex-wrap items-center gap-3">
-              <label class="text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">Focus Crop</label>
-              <select id="focus-crop-select" class="flex-1 min-w-[10rem] text-sm rounded-lg border border-slate-300 shadow-sm px-3 py-2 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+              <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Focus Crop:</label>
+              <select id="focus-crop-select" class="flex-1 min-w-[10rem] text-sm rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-2 py-1.5">
                 <option value="">— select a crop —</option>
               </select>
-              <span id="focus-crop-loading" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600"></span>
+              <span id="focus-crop-loading" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-green-700"></span>
             </div>
             <!-- Custom plant inputs (shown when "Other" selected) -->
-            <div id="custom-crop-inputs" class="hidden mt-3 flex flex-wrap items-center gap-2">
-              <input id="custom-crop-name" type="text" placeholder="Custom plant name" class="flex-1 min-w-[8rem] text-sm rounded-lg border border-slate-300 shadow-sm px-3 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-              <input id="custom-crop-days" type="number" min="7" max="365" placeholder="Est. days to harvest" class="w-40 text-sm rounded-lg border border-slate-300 shadow-sm px-3 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-              <button type="button" id="custom-crop-go" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5">Show Timeline</button>
+            <div id="custom-crop-inputs" class="hidden mt-2 flex flex-wrap items-center gap-2">
+              <input id="custom-crop-name" type="text" placeholder="Custom plant name" class="flex-1 min-w-[8rem] text-sm rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-2 py-1.5" />
+              <input id="custom-crop-days" type="number" min="7" max="365" placeholder="Est. days to harvest" class="w-36 text-sm rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-2 py-1.5" />
+              <button type="button" id="custom-crop-go" class="text-xs bg-green-700 hover:bg-green-800 text-white font-medium px-3 py-1.5 rounded-md transition">Show Timeline</button>
             </div>
           </div>
           <!-- 7-Day Daily Outlook -->
@@ -259,23 +219,23 @@
                 ⚙️ Show Climate Details
               </button>
             </div>
-            <div id="weather-cycle-strip" class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory thin-scroll"></div>
+            <div id="weather-cycle-strip" class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory"></div>
           </div>
         </div>
         
         <!-- Ranked Recommendations Table -->
-        <div class="overflow-x-auto thin-scroll rounded-xl border border-slate-200">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 border-b border-slate-200">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border">
+            <thead class="bg-green-50">
               <tr>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide w-20">Rank</th>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Crop</th>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Score</th>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Layout</th>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Notes</th>
+                <th class="text-left px-3 py-2 font-semibold w-16">Rank</th>
+                <th class="text-left px-3 py-2 font-semibold">Crop</th>
+                <th class="text-left px-3 py-2 font-semibold">Score</th>
+                <th class="text-left px-3 py-2 font-semibold">Layout</th>
+                <th class="text-left px-3 py-2 font-semibold">Notes</th>
               </tr>
             </thead>
-            <tbody id="planner-table-body" class="divide-y divide-slate-100"></tbody>
+            <tbody id="planner-table-body" class="divide-y"></tbody>
           </table>
         </div>
       </div>
@@ -283,40 +243,39 @@
 
     <!-- Leaf Doctor Tab -->
     <section id="doctor" class="tab-content hidden space-y-6">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
-        <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Leaf Doctor &amp; Kitchen Remedy Studio</h2>
-        <p class="text-sm text-slate-500 mt-1 mb-6">Upload a close-up leaf photo and get an instant pathology read plus an organic kitchen remedy.</p>
-        <form id="doctor-form" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="bg-white rounded-lg shadow p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-green-900 mb-4">AI Leaf Doctor &amp; Kitchen Remedy Studio</h2>
+        <form id="doctor-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="md:col-span-2">
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Plant photo</label>
-            <input id="leaf-image" type="file" accept="image/*" required class="w-full text-sm text-slate-600 cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 file:cursor-pointer file:transition-colors" />
-            <div id="image-preview-container" class="hidden mt-3">
-              <img id="image-preview" class="max-h-40 rounded-xl border border-slate-200 shadow-sm" />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Plant photo</label>
+            <input id="leaf-image" type="file" accept="image/*" required class="w-full text-sm" />
+            <div id="image-preview-container" class="hidden mt-2">
+              <img id="image-preview" class="max-h-32 rounded border border-gray-200" />
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Known crop (optional)</label>
-            <select id="doctor-crop" class="w-full rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Known crop (optional)</label>
+            <select id="doctor-crop" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
               <option value="">Auto-detect</option>
             </select>
           </div>
           <div class="flex items-center md:col-span-2">
-            <input id="doctor-mock" type="checkbox" checked class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
-            <label for="doctor-mock" class="ml-2.5 text-sm text-slate-600">Use fast mock diagnosis (no AI call)</label>
+            <input id="doctor-mock" type="checkbox" checked class="h-4 w-4 text-green-600 border-gray-300 rounded" />
+            <label for="doctor-mock" class="ml-2 text-sm text-gray-700">Use fast mock diagnosis (no AI call)</label>
           </div>
           <div class="flex items-end">
-            <button id="diagnose-btn" type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-semibold py-3 px-5 rounded-lg shadow-md shadow-emerald-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-600/30 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0">Diagnose &amp; Remedy</button>
+            <button id="diagnose-btn" type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-md transition">Diagnose &amp; Remedy</button>
           </div>
         </form>
         
         <!-- Loading State -->
-        <div id="doctor-loading" class="hidden mt-5 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+        <div id="doctor-loading" class="hidden mt-4">
           <div class="flex items-center space-x-3">
-            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600"></div>
-            <span class="text-sm font-medium text-emerald-800">Analyzing plant tissue and diagnosing pathology...</span>
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-green-700"></div>
+            <span class="text-sm text-gray-600">Analyzing plant tissue and diagnosing pathology...</span>
           </div>
-          <div class="w-full bg-emerald-100 rounded-full h-2 mt-3 overflow-hidden">
-            <div class="bg-emerald-500 h-2 rounded-full animate-pulse" style="width: 70%"></div>
+          <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div class="bg-green-600 h-2 rounded-full animate-pulse" style="width: 70%"></div>
           </div>
         </div>
       </div>
@@ -327,69 +286,59 @@
       <!-- Image Preview + Results Grid -->
       <div id="doctor-result" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Image Preview Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-5 lg:col-span-1">
-          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Uploaded Leaf</h3>
-          <img id="result-image" class="w-full rounded-xl border border-slate-200 shadow-sm" />
+        <div class="bg-white rounded-lg shadow p-4 lg:col-span-1">
+          <h3 class="text-md font-semibold text-gray-800 mb-3">Uploaded Leaf</h3>
+          <img id="result-image" class="w-full rounded border border-gray-200" />
         </div>
         
         <!-- Diagnosis Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-5 md:p-6 lg:col-span-1">
-          <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">Diagnosis</h3>
+        <div class="bg-white rounded-lg shadow p-5 md:p-6 lg:col-span-1">
+          <h3 class="text-md font-semibold text-gray-800 mb-3">Diagnosis</h3>
           <dl id="diagnosis-details" class="space-y-2 text-sm"></dl>
         </div>
         
         <!-- Remedy Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-emerald-100 bg-emerald-50/30 hover:shadow-md transition-all duration-200 p-5 md:p-6 lg:col-span-1">
-          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wide mb-4">Organic Kitchen Remedy</h3>
+        <div class="bg-white rounded-lg shadow p-5 md:p-6 lg:col-span-1">
+          <h3 class="text-md font-semibold text-gray-800 mb-3">Organic Kitchen Remedy</h3>
           <div id="remedy-details" class="space-y-3 text-sm"></div>
         </div>
       </div>
-
-      <!-- Saved Diagnoses History -->
-      <div id="doctor-history-section" class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
-        <div class="flex items-center justify-between mb-5">
-          <h3 class="text-base font-bold text-slate-800 tracking-tight">📋 Past Leaf Diagnoses</h3>
-          <button id="clear-diagnoses-btn" type="button" class="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-1.5 rounded-lg transition-colors duration-200">Clear History</button>
-        </div>
-        <div id="doctor-history-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <p class="text-sm text-slate-400 italic col-span-full text-center py-8">No past diagnoses saved yet.</p>
-        </div>
-      </div>
-
     </section>
 
     <!-- Economics Tab -->
     <section id="economics" class="tab-content hidden space-y-6">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
-        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Harvest Economics &amp; PDF Export</h2>
-        <p class="text-sm text-slate-500 mt-1 mb-6">Model your expected yield and savings across crops, then export a polished PDF report.</p>
-
-        <button id="use-active-garden" type="button" class="text-sm font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-4 py-2 rounded-lg mb-4 inline-flex items-center gap-1.5 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0">
-          <span aria-hidden="true">↻</span> Use My Active Garden
-        </button>
-
-        <div id="basket-rows" class="space-y-4 mb-4"></div>
-        <button id="add-basket-row" type="button" class="text-sm font-semibold text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-4 py-2 rounded-lg mb-6 inline-flex items-center gap-1.5 transition-colors duration-200">+ Add another crop</button>
-
-        <div class="mb-6">
-          <button id="download-report" class="w-full md:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md shadow-blue-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/30 active:translate-y-0">Download PDF Report</button>
+      <div class="bg-white rounded-lg shadow p-5 md:p-6">
+        <h2 class="text-lg font-semibold text-green-900 mb-4">Harvest Economics &amp; PDF Export</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Crop</label>
+            <select id="econ-crop" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border px-3 py-2">
+              <option value="">Select a crop</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Number of pots: <span id="pot-count-display">4</span></label>
+            <input id="pot-count" type="range" min="1" max="50" value="4" class="w-full" />
+          </div>
+          <div class="flex items-end">
+            <button id="download-report" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded-md transition">Download PDF Report</button>
+          </div>
         </div>
 
-        <div id="econ-summary" class="hidden bg-emerald-50/70 border border-emerald-100 rounded-xl p-5 text-sm space-y-1.5 mb-6 text-slate-700"></div>
+        <div id="econ-summary" class="hidden bg-green-50 rounded-md p-4 text-sm space-y-1 mb-6"></div>
 
-        <h3 class="text-base font-bold text-slate-800 tracking-tight mb-4">Current market prices</h3>
-        <div class="overflow-x-auto thin-scroll rounded-xl border border-slate-200">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 border-b border-slate-200">
+        <h3 class="text-md font-semibold text-gray-800 mb-3">Current market prices</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border">
+            <thead class="bg-gray-100">
               <tr>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Crop</th>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Retail (LKR/kg)</th>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Wholesale (LKR/kg)</th>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Margin</th>
-                <th class="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">Live price</th>
+                <th class="text-left px-3 py-2 font-semibold">Crop</th>
+                <th class="text-left px-3 py-2 font-semibold">Retail (LKR/kg)</th>
+                <th class="text-left px-3 py-2 font-semibold">Wholesale (LKR/kg)</th>
+                <th class="text-left px-3 py-2 font-semibold">Margin</th>
               </tr>
             </thead>
-            <tbody id="market-table-body" class="divide-y divide-slate-100"></tbody>
+            <tbody id="market-table-body" class="divide-y"></tbody>
           </table>
         </div>
       </div>
@@ -423,7 +372,7 @@
     function showStatus(msg, isError = false) {
       const el = document.getElementById('status-message');
       el.textContent = msg;
-      el.className = `fixed bottom-4 right-4 max-w-sm text-white text-sm px-4 py-3 rounded-xl shadow-xl transition-all duration-200 ${isError ? 'bg-red-600' : 'bg-slate-900'}`;
+      el.className = `fixed bottom-4 right-4 max-w-sm text-white text-sm px-4 py-3 rounded-md shadow-lg ${isError ? 'bg-red-700' : 'bg-gray-900'}`;
       el.classList.remove('hidden');
       setTimeout(() => el.classList.add('hidden'), 4000);
     }
@@ -492,155 +441,6 @@
     document.getElementById('space-width').addEventListener('input', updateDimsCalc);
     document.getElementById('space-unit').addEventListener('change', updateDimsCalc);
 
-    //const DIAGNOSIS_STORAGE_KEY = 'urbanagri_saved_diagnoses';
-
-    function getDiagnosisStorageKey() {
-      const token = (typeof getAuthToken === 'function') ? getAuthToken() : null;
-      if (token && typeof decodeTokenPayload === 'function') {
-        const claims = decodeTokenPayload(token);
-        if (claims && (claims.sub || claims.email)) {
-          return `urbanagri_saved_diagnoses_${claims.sub || claims.email}`;
-        }
-      }
-      return 'urbanagri_saved_diagnoses_anonymous';
-    }
-
-    function getSavedDiagnoses() {
-      try {
-        const raw = localStorage.getItem(getDiagnosisStorageKey());
-        return raw ? JSON.parse(raw) : [];
-      } catch (_) {
-        return [];
-      }
-    }
-
-    function saveDiagnosisRecord(record) {
-      const list = getSavedDiagnoses();
-      list.unshift(record);
-      if (list.length > 9) list.pop();
-      localStorage.setItem(getDiagnosisStorageKey(), JSON.stringify(list));
-      renderDiagnosisHistory();
-    }
-
-    window.restoreSavedDiagnosis = function(index) {
-      const list = getSavedDiagnoses();
-      const item = list[index];
-      if (!item) return;
-
-      const d = item.diagnosis || {
-        crop_detected: item.crop,
-        issue_type: item.issue,
-        severity: item.severity,
-        crop_confidence: 0.90,
-        disease_confidence: 0.85,
-        symptoms: ["Diagnosed from uploaded leaf image"],
-        recommended_action: "Follow organic kitchen remedy guidelines."
-      };
-      const r = item.remedy || {
-        remedy_name: "Tailored Organic Garden Remedy",
-        ingredients: ["Garlic bulb", "Castile soap", "Warm water"],
-        preparation_steps: ["Liquefy and blend ingredients.", "Strain into a spray bottle."],
-        application_schedule: "Apply every 5-7 days in early morning or late afternoon.",
-        safety_notes: ["Spot test on 2 leaves first.", "Do not spray in full midday sun."]
-      };
-
-      const resultImage = document.getElementById('result-image');
-      if (resultImage && item.imageData) {
-        resultImage.src = item.imageData;
-      }
-
-      const cropConf = d.crop_confidence != null ? d.crop_confidence : 0.85;
-      const cropConfPct = Math.round(cropConf * 100);
-      const diseaseConf = d.disease_confidence != null ? d.disease_confidence : 0.80;
-      const diseaseConfPct = Math.round(diseaseConf * 100);
-
-      const diagDetails = document.getElementById('diagnosis-details');
-      if (diagDetails) {
-        diagDetails.innerHTML = `
-          <div>
-            <dt class="font-medium text-gray-500">Plant Species</dt>
-            <dd class="font-semibold">${d.crop_detected || '-'}</dd>
-            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-              <div class="bg-blue-600 h-2 rounded-full" style="width: ${cropConfPct}%"></div>
-            </div>
-            <span class="text-xs text-gray-500">Confidence: ${cropConfPct}%</span>
-          </div>
-          <div class="pt-2">
-            <dt class="font-medium text-gray-500">Disease / Issue</dt>
-            <dd class="font-semibold">${d.issue_type || '-'}</dd>
-            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-              <div class="bg-red-600 h-2 rounded-full" style="width: ${diseaseConfPct}%"></div>
-            </div>
-            <span class="text-xs text-gray-500">Confidence: ${diseaseConfPct}%</span>
-          </div>
-          <div class="pt-2"><dt class="font-medium text-gray-500">Severity</dt><dd><span class="inline-block px-2 py-1 rounded text-xs font-medium ${
-            d.severity === 'high' ? 'bg-red-100 text-red-800' : 
-            d.severity === 'moderate' ? 'bg-yellow-100 text-yellow-800' : 
-            'bg-green-100 text-green-800'
-          }">${d.severity || '-'}</span></dd></div>
-          <div class="pt-2"><dt class="font-medium text-gray-500">Symptoms</dt><dd class="text-gray-700">${(d.symptoms || []).join(', ') || '-'}</dd></div>
-          <div class="pt-2"><dt class="font-medium text-gray-500">Recommended Action</dt><dd class="text-gray-700">${d.recommended_action || '-'}</dd></div>
-        `;
-      }
-
-      const remedyTitle = r.remedy_name || r.title || 'Custom Organic Treatment';
-      const ingredientsText = Array.isArray(r.ingredients) ? r.ingredients.join(', ') : (r.ingredients || '-');
-      const prepRaw = r.preparation_steps || r.preparation || [];
-      const prepList = Array.isArray(prepRaw) ? prepRaw : [prepRaw];
-      const prepHtml = prepList.length
-        ? `<ol class="list-decimal list-inside mt-1 space-y-1">${prepList.map(s => `<li>${s.replace(/^\d+\.\s*/, '')}</li>`).join('')}</ol>`
-        : '-';
-      const safetyText = Array.isArray(r.safety_notes) ? r.safety_notes.join(', ') : (r.safety_notes || '-');
-
-      const remedyDetails = document.getElementById('remedy-details');
-      if (remedyDetails) {
-        remedyDetails.innerHTML = `
-          <p class="font-semibold text-green-900">${remedyTitle}</p>
-          <div><strong>Ingredients:</strong> ${ingredientsText}</div>
-          <div><strong>Preparation:</strong> ${prepHtml}</div>
-          <div><strong>Application schedule:</strong> ${r.application_schedule || '-'}</div>
-          <div><strong>Safety notes:</strong> ${safetyText}</div>
-        `;
-      }
-
-      const resultDiv = document.getElementById('doctor-result');
-      if (resultDiv) {
-        resultDiv.classList.remove('hidden');
-        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    };
-
-    function renderDiagnosisHistory() {
-      const container = document.getElementById('doctor-history-list');
-      if (!container) return;
-      const list = getSavedDiagnoses();
-
-      if (!list.length) {
-        container.innerHTML = '<p class="text-xs text-gray-400 italic col-span-full">No past diagnoses saved yet.</p>';
-        return;
-      }
-
-      container.innerHTML = list.map((item, idx) => `
-        <div data-index="${idx}" class="history-card border border-gray-200 rounded-lg p-3 bg-gray-50 flex gap-3 items-start shadow-sm cursor-pointer hover:border-green-600 hover:bg-green-50/50 transition">
-          <img src="${item.imageData}" class="w-16 h-16 object-cover rounded border border-gray-200 shrink-0 pointer-events-none" alt="${item.crop}" />
-          <div class="flex-1 min-w-0 pointer-events-none">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-gray-900 truncate">${item.crop}</span>
-              <span class="text-[10px] text-gray-400">${item.date}</span>
-            </div>
-            <p class="text-xs font-medium text-red-700 truncate mt-0.5">${item.issue}</p>
-            <div class="flex items-center justify-between mt-1">
-              <span class="inline-block text-[10px] px-1.5 py-0.5 rounded bg-white border border-gray-200 text-gray-600">
-                Severity: ${item.severity}
-              </span>
-              <span class="text-[10px] text-green-700 font-semibold underline">View Report ↗</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-
     // Weather emoji helper
     function weatherEmoji(minC, maxC) {
       const avg = (minC + maxC) / 2;
@@ -665,12 +465,13 @@
       try {
         crops = await (await apiFetch('/api/crops')).json();
         const doctorSelect = document.getElementById('doctor-crop');
+        const econSelect = document.getElementById('econ-crop');
         crops.forEach(c => {
-          doctorSelect.add(new Option(c.name, c.name));
+          const opt1 = new Option(c.name, c.name);
+          const opt2 = new Option(c.name, c.id);
+          doctorSelect.add(opt1);
+          econSelect.add(opt2);
         });
-        // Basket rows may already exist (added before crops finished loading) —
-        // backfill their crop dropdowns now that we have the list.
-        document.querySelectorAll('.basket-crop').forEach(sel => populateBasketCropSelect(sel));
       } catch (err) {
         showStatus('Could not load crops: ' + err.message, true);
       }
@@ -681,78 +482,17 @@
         marketPrices = await (await apiFetch('/api/market/prices')).json();
         const tbody = document.getElementById('market-table-body');
         tbody.innerHTML = marketPrices.map(p => `
-          <tr class="hover:bg-slate-50 transition-colors" data-crop="${p.crop_name}">
-            <td class="px-4 py-3 text-slate-800 font-medium">${p.crop_name}</td>
-            <td class="px-4 py-3 text-slate-700">${p.retail_price_per_kg.toFixed(2)}</td>
-            <td class="px-4 py-3 text-slate-700">${p.wholesale_price_per_kg.toFixed(2)}</td>
-            <td class="px-4 py-3">${p.margin_percent ? `<span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2 py-1 rounded-lg">${p.margin_percent.toFixed(1)}%</span>` : '-'}</td>
-            <td class="px-4 py-3">
-              <button type="button" class="lookup-price-btn text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-2.5 py-1.5 rounded-lg transition-colors duration-200" data-crop="${p.crop_name}">🔍 Look up</button>
-              <div class="lookup-result text-xs mt-1.5 text-slate-600"></div>
-            </td>
+          <tr class="hover:bg-gray-50">
+            <td class="px-3 py-2">${p.crop_name}</td>
+            <td class="px-3 py-2">${p.retail_price_per_kg.toFixed(2)}</td>
+            <td class="px-3 py-2">${p.wholesale_price_per_kg.toFixed(2)}</td>
+            <td class="px-3 py-2">${p.margin_percent ? p.margin_percent.toFixed(1) + '%' : '-'}</td>
           </tr>
         `).join('');
       } catch (err) {
         showStatus('Could not load market prices: ' + err.message, true);
       }
     }
-
-    // ---------------------------------------------------------------------
-    // Live price lookup: read-only search, human reviews, then "Apply" saves
-    // it via PATCH /api/market/prices/{crop}. Once applied, loadMarketPrices()
-    // refreshes `marketPrices`, so the basket totals and PDF export (which
-    // both read from that same array) automatically use the new price —
-    // nothing else needs to change for that to take effect.
-    // ---------------------------------------------------------------------
-    async function runPriceLookup(cropName, resultEl) {
-      resultEl.textContent = 'Searching…';
-      try {
-        const res = await apiFetch(`/api/market/prices/lookup?crop_name=${encodeURIComponent(cropName)}`);
-        const data = await res.json();
-        if (data.best_guess == null) {
-          resultEl.textContent = data.note || 'No price found.';
-          return;
-        }
-        const source = data.candidates && data.candidates[0];
-        resultEl.innerHTML = `
-          <span class="text-slate-700">Found: <strong class="text-slate-900">LKR ${data.best_guess.toFixed(2)}/kg</strong></span>
-          ${source && source.source_url ? `(<a href="${source.source_url}" target="_blank" rel="noopener" class="text-emerald-700 underline hover:text-emerald-800">source</a>)` : ''}
-          <button type="button" class="apply-price-btn text-emerald-700 hover:text-emerald-800 font-semibold ml-1" data-crop="${cropName}" data-price="${data.best_guess}">Apply</button>
-        `;
-      } catch (err) {
-        resultEl.textContent = 'Lookup failed: ' + err.message;
-      }
-    }
-
-    async function applyLookedUpPrice(cropName, price, resultEl) {
-      resultEl.textContent = 'Applying…';
-      try {
-        await apiFetch(`/api/market/prices/${encodeURIComponent(cropName)}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ retail_price_per_kg: price }),
-        });
-        showStatus(`Updated ${cropName} to LKR ${price.toFixed(2)}/kg.`);
-        await loadMarketPrices();   // refreshes marketPrices + re-renders the table
-        updateEconSummary();        // basket totals immediately reflect the new price
-      } catch (err) {
-        resultEl.textContent = 'Apply failed: ' + err.message;
-      }
-    }
-
-    document.getElementById('market-table-body').addEventListener('click', (e) => {
-      const lookupBtn = e.target.closest('.lookup-price-btn');
-      if (lookupBtn) {
-        const resultEl = lookupBtn.parentElement.querySelector('.lookup-result');
-        runPriceLookup(lookupBtn.dataset.crop, resultEl);
-        return;
-      }
-      const applyBtn = e.target.closest('.apply-price-btn');
-      if (applyBtn) {
-        const resultEl = applyBtn.closest('.lookup-result');
-        applyLookedUpPrice(applyBtn.dataset.crop, parseFloat(applyBtn.dataset.price), resultEl);
-      }
-    });
 
     // Planner location selection
     let map = null;
@@ -1157,26 +897,13 @@
         })).json();
 
         const d = data.diagnosis || {};
-        const r = data.linked_remedy || {};
         
-        // Display uploaded image in result card and save to history gallery
+        // Display uploaded image in result card
         const resultImage = document.getElementById('result-image');
         if (fileInput.files[0]) {
           const reader = new FileReader();
           reader.onload = (event) => {
-            const dataUrl = event.target.result;
-            resultImage.src = dataUrl;
-
-            // Automatically save full diagnosis and remedy to local history
-            saveDiagnosisRecord({
-              crop: d.crop_detected || 'Unknown Plant',
-              issue: d.issue_type || 'Healthy / No issue',
-              severity: d.severity || 'Normal',
-              date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
-              imageData: dataUrl,
-              diagnosis: d,
-              remedy: r
-            });
+            resultImage.src = event.target.result;
           };
           reader.readAsDataURL(fileInput.files[0]);
         }
@@ -1215,6 +942,7 @@
           <div class="pt-2"><dt class="font-medium text-gray-500">Recommended Action</dt><dd class="text-gray-700">${d.recommended_action || '-'}</dd></div>
         `;
 
+        const r = data.linked_remedy || {};
         const remedyTitle = r.remedy_name || r.title || 'Custom Organic Treatment';
         
         // Handle ingredients whether returned as Array or String
@@ -1268,264 +996,87 @@
       } catch (err) {
         showStatus('Diagnosis failed: ' + err.message, true);
       } finally {
+        // Reset button state
         diagnoseBtn.disabled = false;
         diagnoseBtn.textContent = 'Diagnose & Remedy';
         loadingDiv.classList.add('hidden');
       }
     });
 
+    document.getElementById('pot-count').addEventListener('input', (e) => {
+      document.getElementById('pot-count-display').textContent = e.target.value;
+      updateEconSummary();
+    });
+    document.getElementById('econ-crop').addEventListener('change', updateEconSummary);
+
+    function getSelectedCrop() {
+      const id = parseInt(document.getElementById('econ-crop').value, 10);
+      return crops.find(c => c.id === id) || null;
+    }
+
     function getMarketPrice(cropName) {
       return marketPrices.find(p => p.crop_name === cropName) || null;
     }
 
-    // ---------------------------------------------------------------------
-    // Multi-Crop Basket: repeatable {crop, pot count} rows.
-    // Each row computes its own yield/savings with the exact same formula
-    // the old single-crop calculator used; updateEconSummary() sums them.
-    // ---------------------------------------------------------------------
-    let basketRowSeq = 0;
-    let basketItems = []; // last computed basket, used by the download handler
-
-   function populateBasketCropSelect(select) {
-      const previousValue = select.value;
-      select.innerHTML = '<option value="">Select a crop</option>';
-      crops.forEach(c => {
-        const displayName = (c.name.toLowerCase() === 'green chilli' || c.name.toLowerCase() === 'chilli')
-          ? 'Chillie'
-          : c.name;
-        select.add(new Option(displayName, c.id));
-      });
-      if (previousValue) select.value = previousValue;
-    }
-    function addBasketRow() {
-      const rowId = `basket-row-${basketRowSeq++}`;
-      const row = document.createElement('div');
-      row.className = 'grid grid-cols-1 md:grid-cols-4 gap-4 items-end pb-4 border-b border-slate-100 last:border-0 last:pb-0';
-      row.dataset.rowId = rowId;
-      row.innerHTML = `
-        <div class="md:col-span-2">
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Crop</label>
-          <select class="basket-crop w-full rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
-            <option value="">Select a crop</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Pots: <span class="basket-pot-display text-emerald-700 font-bold">4</span></label>
-          <input type="range" min="1" max="200" value="4" class="basket-pot-count w-full cursor-pointer" />
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="basket-row-summary text-xs font-medium text-emerald-700 flex-1"></span>
-          <button type="button" class="remove-basket-row text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors duration-200 whitespace-nowrap">Remove</button>
-        </div>
-      `;
-      document.getElementById('basket-rows').appendChild(row);
-
-      const select = row.querySelector('.basket-crop');
-      populateBasketCropSelect(select);
-      select.addEventListener('change', updateEconSummary);
-
-      const potInput = row.querySelector('.basket-pot-count');
-      potInput.addEventListener('input', (e) => {
-        row.querySelector('.basket-pot-display').textContent = e.target.value;
-        updateEconSummary();
-      });
-
-      row.querySelector('.remove-basket-row').addEventListener('click', () => {
-        row.remove();
-        updateEconSummary();
-      });
-
-      updateEconSummary();
-    }
-
-    document.getElementById('add-basket-row').addEventListener('click', addBasketRow);
-
-    // "Use My Active Garden" — pulls the signed-in grower's own active plants
-    // from GET /api/garden/dashboard and replaces the basket with exact counts
-    // (grouped by crop_name). Deliberately uses its own fetch (not the shared
-    // apiFetch) so this is the only call that sends an Authorization header —
-    // every other tab's requests are untouched.
-    async function useMyActiveGarden() {
-      const btn = document.getElementById('use-active-garden');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<span class="animate-spin inline-block mr-1">↻</span> Syncing...';
-      btn.disabled = true;
-
-      try {
-        const token = (typeof getAuthToken === 'function') ? getAuthToken() : null;
-        if (!token) {
-          showStatus('Please sign in to load your active garden.', true);
-          return;
-        }
-
-        const res = await fetch('/api/garden/dashboard', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const dashboard = await res.json();
-        
-        const plants = dashboard.plants || [];
-        if (!plants.length) {
-          showStatus('No active plants found in your garden.');
-          return;
-        }
-
-        // Group by crop_name, summing pot quantity (falls back to 1 per
-        // entry if the quantity field isn't present yet on the backend).
-        const potCounts = {};
-        plants.forEach(p => {
-          const name = p.crop_name || 'Other';
-          const qty = parseInt(p.quantity, 10);
-          const safeQty = (!isNaN(qty) && qty > 0) ? qty : 1;
-          potCounts[name] = (potCounts[name] || 0) + safeQty;
-        });
-
-        const matched = [];
-        const unmatched = [];
-        let clamped = false;
-        
-        // Normalize common variations so Chilli / Chillie connects with Green Chilli
-        const normalizeCropName = (name) => {
-          const n = (name || '').trim().toLowerCase();
-          if (n === 'chilli' || n === 'chillie' || n === 'green chili' || n === 'chili') {
-            return 'green chilli';
-          }
-          return n;
-        };
-
-        Object.entries(potCounts).forEach(([cropName, count]) => {
-          const targetName = normalizeCropName(cropName);
-          const crop = crops.find(c => {
-            const catalogName = normalizeCropName(c.name);
-            return catalogName === targetName || c.name.toLowerCase() === cropName.toLowerCase();
-          });
-          
-          if (!crop) {
-            unmatched.push(cropName);
-            return;
-          }
-          const clampedCount = Math.min(count, 200);
-          if (clampedCount < count) clamped = true;
-          matched.push({ crop, potCount: clampedCount });
-        });
-
-        if (!matched.length) {
-          showStatus('None of your active plants match a known crop in the catalog.', true);
-          return;
-        }
-
-        // Clear existing basket rows
-        document.getElementById('basket-rows').innerHTML = '';
-        
-        matched.forEach(({ crop, potCount }) => {
-          addBasketRow();
-          const rows = document.querySelectorAll('#basket-rows > div');
-          const newRow = rows[rows.length - 1];
-          
-          newRow.querySelector('.basket-crop').value = String(crop.id);
-          newRow.querySelector('.basket-pot-count').value = potCount;
-          newRow.querySelector('.basket-pot-display').textContent = potCount;
-        });
-        
-        updateEconSummary();
-
-        const notes = [];
-        if (unmatched.length) notes.push(`skipped: ${unmatched.join(', ')}`);
-        if (clamped) notes.push('counts capped at 200 pots max');
-        
-        showStatus(notes.length ? `Synced garden — ${notes.join('; ')}.` : 'Synced with your active garden.', notes.length > 0 && unmatched.length > 0);
-        
-      } catch (err) {
-        showStatus('Error syncing active garden: ' + err.message, true);
-        console.error("Garden Sync Error:", err);
-      } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }
-    }
-
-    document.getElementById('use-active-garden').addEventListener('click', useMyActiveGarden);
     function updateEconSummary() {
-      const rows = document.querySelectorAll('#basket-rows > div');
+      const crop = getSelectedCrop();
+      const potCount = parseInt(document.getElementById('pot-count').value, 10);
       const summary = document.getElementById('econ-summary');
-      basketItems = [];
-      let grandTotalSavings = 0;
-      const lines = [];
-
-      rows.forEach(row => {
-        const select = row.querySelector('.basket-crop');
-        const potInput = row.querySelector('.basket-pot-count');
-        const rowSummaryEl = row.querySelector('.basket-row-summary');
-        const cropId = parseInt(select.value, 10);
-        const crop = crops.find(c => c.id === cropId);
-        if (!crop) {
-          rowSummaryEl.textContent = '';
-          return;
-        }
-        const potCount = parseInt(potInput.value, 10);
-        const yieldPerPotG = crop.typical_yield_per_pot_g || 200;
-        const totalYieldKg = (yieldPerPotG * potCount) / 1000;
-        const price = getMarketPrice(crop.name);
-        const retailPrice = price ? price.retail_price_per_kg : 0;
-        const currency = (price && price.currency) || 'LKR';
-        const savings = totalYieldKg * retailPrice;
-
-        grandTotalSavings += savings;
-        rowSummaryEl.textContent = `${totalYieldKg.toFixed(2)} kg → ${currency} ${savings.toFixed(2)}`;
-
-        basketItems.push({
-          crop_name: crop.name,
-          pot_count: potCount,
-          expected_yield_kg: totalYieldKg,
-          retail_price_per_kg: retailPrice,
-          currency,
-          estimated_savings: savings,
-        });
-        lines.push(`<p>${crop.name}: ${potCount} pots × ${yieldPerPotG} g → ${totalYieldKg.toFixed(2)} kg → ${currency} ${savings.toFixed(2)}</p>`);
-      });
-
-      if (!basketItems.length) {
+      if (!crop) {
         summary.classList.add('hidden');
         return;
       }
-
-      const currency = basketItems[0].currency || 'LKR';
-      lines.push(`<p class="font-bold pt-2 mt-1 border-t border-emerald-200 text-emerald-900">Grand total estimated savings: ${currency} ${grandTotalSavings.toFixed(2)}</p>`);
-      summary.innerHTML = lines.join('');
+      const yieldPerPotG = crop.typical_yield_per_pot_g || 200;
+      const totalYieldKg = (yieldPerPotG * potCount) / 1000;
+      const price = getMarketPrice(crop.name);
+      const retailPrice = price ? price.retail_price_per_kg : 0;
+      const savings = totalYieldKg * retailPrice;
+      summary.innerHTML = `
+        <p><strong>Selected crop:</strong> ${crop.name}</p>
+        <p><strong>Expected total yield:</strong> ${totalYieldKg.toFixed(2)} kg (${potCount} pots × ${yieldPerPotG} g)</p>
+        <p><strong>Estimated grocery savings:</strong> LKR ${savings.toFixed(2)}</p>
+      `;
+      summary.dataset.yieldKg = totalYieldKg.toFixed(3);
+      summary.dataset.retailPrice = retailPrice.toFixed(2);
+      summary.dataset.savings = savings.toFixed(2);
+      summary.dataset.cropName = crop.name;
       summary.classList.remove('hidden');
     }
 
     document.getElementById('download-report').addEventListener('click', async () => {
-      if (!basketItems.length) {
-        showStatus('Please select at least one crop first.', true);
+      const crop = getSelectedCrop();
+      if (!crop) {
+        showStatus('Please select a crop first.', true);
         return;
       }
-
-      const grandTotal = basketItems.reduce((sum, item) => sum + item.estimated_savings, 0);
-      const filenamePart = basketItems.map(i => i.crop_name).join('_').replace(/\s+/g, '_');
+      const summary = document.getElementById('econ-summary');
+      const yieldKg = parseFloat(summary.dataset.yieldKg || '0');
+      const retailPrice = parseFloat(summary.dataset.retailPrice || '0');
+      const savings = parseFloat(summary.dataset.savings || '0');
+      const cropName = summary.dataset.cropName || crop.name;
 
       const payload = {
-        output_filename: `garden_report_${filenamePart}.pdf`,
+        output_filename: `garden_report_${cropName.replace(/\s+/g, '_')}.pdf`,
         plan_data: {
           location: { lat: 6.9271, lon: 79.8612 },
           container_type: 'Pot',
           space_sqm: 2.0,
           target_month: 8,
           forecast_summary: { avg_min_temp_c: 24.5, avg_max_temp_c: 31.0, avg_daylight_hours: 12.0 },
-          recommendations: basketItems.map(item => ({
-            crop: { name: item.crop_name, scientific_name: '', category: '' },
+          recommendations: [{
+            crop: { name: crop.name, scientific_name: crop.scientific_name || '', category: crop.category || '' },
             suitability_score: 95,
-            layout: `${item.pot_count} pots`,
-            notes: `Expected yield ${item.expected_yield_kg.toFixed(2)} kg based on typical pot yield.`
-          }))
+            layout: `${document.getElementById('pot-count').value} pots`,
+            notes: `Expected yield ${yieldKg.toFixed(2)} kg based on typical pot yield.`
+          }]
         },
         diagnosis_data: null,
         savings_data: {
-          items: basketItems.map(({ crop_name, expected_yield_kg, retail_price_per_kg, currency, estimated_savings }) => (
-            { crop_name, expected_yield_kg, retail_price_per_kg, currency, estimated_savings }
-          )),
-          currency: basketItems[0].currency || 'LKR',
-          total_estimated_savings: grandTotal
+          crop_name: cropName,
+          expected_yield_kg: yieldKg,
+          retail_price_per_kg: retailPrice,
+          estimated_savings: savings,
+          currency: 'LKR'
         }
       };
 
@@ -1619,36 +1170,7 @@
     });
 
     loadCrops();
-    addBasketRow(); // start the basket with one empty row
     loadMarketPrices();
-
-    // Render saved diagnosis history on initial load
-    renderDiagnosisHistory();
-
-    // Clear history handler
-    const clearBtn = document.getElementById('clear-diagnoses-btn');
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        if (confirm('Clear all saved diagnosis history?')) {
-          localStorage.removeItem(getDiagnosisStorageKey());
-          renderDiagnosisHistory();
-        }
-      });
-    }
-
-    // Restore full diagnosis report when a history card is clicked
-    const historyList = document.getElementById('doctor-history-list');
-    if (historyList) {
-      historyList.addEventListener('click', (e) => {
-        const card = e.target.closest('.history-card');
-        if (card && card.dataset.index !== undefined) {
-          window.restoreSavedDiagnosis(parseInt(card.dataset.index, 10));
-        }
-      });
-    }
-
-    
-    
   </script>
 
   <!-- Auth UI wiring: mirrors garden.html's user badge using shared auth.js -->

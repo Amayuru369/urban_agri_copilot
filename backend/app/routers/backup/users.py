@@ -220,18 +220,10 @@ def delete_user(
 ):
     """Delete a profile along with its plants (and their alerts) and locations.
 
-    Authorization:
-    - Admins may delete any profile.
-    - A non-admin user may delete their own profile (self-service account
-      deletion), but not anyone else's.
-    - Any other caller (including unauthenticated) receives 403.
+    Authorization: admins only. Any other caller receives 403.
     """
-    if current_user is None:
-        raise HTTPException(status_code=403, detail="Authentication required to delete a profile.")
-
-    is_admin = bool(getattr(current_user, "is_admin", False))
-    if not is_admin and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="You are not allowed to delete this profile.")
+    if current_user is None or not bool(getattr(current_user, "is_admin", False)):
+        raise HTTPException(status_code=403, detail="Administrator privileges required to delete a profile.")
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
