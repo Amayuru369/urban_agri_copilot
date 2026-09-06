@@ -55,7 +55,7 @@
     <div class="absolute inset-0 opacity-[0.06] pointer-events-none" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 22px 22px;"></div>
     <div class="relative max-w-screen-2xl mx-auto px-6 py-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div class="flex items-center gap-3.5">
-        <div class="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 backdrop-blur text-2xl shadow-inner">🌿</div>
+        <div class="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 backdrop-blur text-2xl shadow-inner">ðŸŒ¿</div>
         <div>
           <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">UrbanAgri-Copilot</h1>
           <p class="text-emerald-100/90 text-sm mt-1 font-medium">Smart planning, diagnosis, and harvest economics for Sri Lankan urban growers</p>
@@ -74,12 +74,12 @@
         <!-- Signed-in badge (hidden until JS confirms a session) -->
         <div id="auth-badge" class="hidden items-center gap-2">
           <div class="text-right leading-tight pl-3 border-l border-white/20">
-            <p id="auth-badge-name" class="text-xs font-semibold text-white max-w-[160px] truncate">—</p>
-            <p id="auth-badge-role" class="text-[10px] font-bold uppercase tracking-wider text-emerald-200">—</p>
+            <p id="auth-badge-name" class="text-xs font-semibold text-white max-w-[160px] truncate">â€”</p>
+            <p id="auth-badge-role" class="text-[10px] font-bold uppercase tracking-wider text-emerald-200">â€”</p>
           </div>
           <button id="auth-settings-btn" type="button" title="Profile settings"
                   class="text-xs font-medium text-emerald-50 hover:text-white bg-white/10 hover:bg-white/20 ring-1 ring-white/15 px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-1.5">
-            <span>⚙️</span><span class="hidden sm:inline">Settings</span>
+            <span>âš™ï¸</span><span class="hidden sm:inline">Settings</span>
           </button>
           <button id="auth-logout-btn" type="button" title="Sign out"
                   class="text-xs font-medium text-emerald-50 hover:text-white bg-white/10 hover:bg-red-500/90 ring-1 ring-white/15 hover:ring-red-400/40 px-3 py-2 rounded-lg transition-all duration-200">
@@ -105,7 +105,7 @@
       <a href="/garden.html"
          class="shrink-0 inline-flex items-center gap-2 px-5 py-3.5 text-sm md:text-base font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-l border-slate-100 whitespace-nowrap transition-colors duration-200"
          title="Open the Plant Monitor & Garden dashboard">
-        <span>🌱</span> Plant Monitor &amp; Garden <span class="text-emerald-400">↗</span>
+        <span>ðŸŒ±</span> Plant Monitor &amp; Garden <span class="text-emerald-400">â†—</span>
       </a>
     </nav>
 
@@ -113,7 +113,7 @@
     <section id="planner" class="tab-content space-y-6">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
         <h2 class="text-lg font-bold text-slate-800 tracking-tight">Plan your balcony or terrace garden</h2>
-        <p class="text-sm text-slate-500 mt-1 mb-6">Tell us about your space and target season — we'll rank the crops that thrive on your balcony.</p>
+        <p class="text-sm text-slate-500 mt-1 mb-6">Tell us about your space and target season â€” we'll rank the crops that thrive on your balcony.</p>
         <form id="planner-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           <div>
             <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Latitude</label>
@@ -154,8 +154,8 @@
                 <option value="6.7056,80.3847">Ratnapura</option>
                 <option value="7.2513,80.3464">Kegalle</option>
               </select>
-              <button type="button" id="currentLocationBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 px-3.5 rounded-lg border border-slate-200 transition-all duration-200 hover:-translate-y-0.5">📍 Current</button>
-              <button type="button" id="pickOnMapBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 px-3.5 rounded-lg border border-slate-200 transition-all duration-200 hover:-translate-y-0.5">🗺️ Pick on Map</button>
+              <button type="button" id="currentLocationBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 px-3.5 rounded-lg border border-slate-200 transition-all duration-200 hover:-translate-y-0.5">ðŸ“ Current</button>
+              <button type="button" id="pickOnMapBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 px-3.5 rounded-lg border border-slate-200 transition-all duration-200 hover:-translate-y-0.5">ðŸ—ºï¸ Pick on Map</button>
             </div>
           </div>
           <div>
@@ -177,9 +177,9 @@
             <div id="space-area-input">
               <div class="flex items-center gap-2">
                 <input id="space_sqm" type="number" step="0.1" min="0.1" max="50" required value="2" placeholder="e.g. 5.0" class="flex-1 rounded-lg border border-slate-300 shadow-sm px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-2.5 rounded-lg whitespace-nowrap">m²</span>
+                <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-2.5 rounded-lg whitespace-nowrap">mÂ²</span>
               </div>
-              <p class="text-xs text-slate-500 mt-1.5">Enter floor area in square meters (m²).</p>
+              <p class="text-xs text-slate-500 mt-1.5">Enter floor area in square meters (mÂ²).</p>
             </div>
             <!-- Dimensions mode -->
             <div id="space-dims-input" class="hidden">
@@ -237,7 +237,7 @@
             <div class="flex flex-wrap items-center gap-3">
               <label class="text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">Focus Crop</label>
               <select id="focus-crop-select" class="flex-1 min-w-[10rem] text-sm rounded-lg border border-slate-300 shadow-sm px-3 py-2 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition">
-                <option value="">— select a crop —</option>
+                <option value="">â€” select a crop â€”</option>
               </select>
               <span id="focus-crop-loading" class="hidden animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600"></span>
             </div>
@@ -256,7 +256,7 @@
           <div id="weather-4week-view" class="hidden">
             <div class="flex items-center justify-end mb-2">
               <button type="button" id="climate-detail-toggle" class="text-xs px-3 py-1 rounded-md bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition" title="Toggle detailed temperature, humidity, and daylight metrics">
-                ⚙️ Show Climate Details
+                âš™ï¸ Show Climate Details
               </button>
             </div>
             <div id="weather-cycle-strip" class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory thin-scroll"></div>
@@ -348,7 +348,7 @@
       <!-- Saved Diagnoses History -->
       <div id="doctor-history-section" class="bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 p-6 md:p-7">
         <div class="flex items-center justify-between mb-5">
-          <h3 class="text-base font-bold text-slate-800 tracking-tight">📋 Past Leaf Diagnoses</h3>
+          <h3 class="text-base font-bold text-slate-800 tracking-tight">ðŸ“‹ Past Leaf Diagnoses</h3>
           <button id="clear-diagnoses-btn" type="button" class="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-100 px-3 py-1.5 rounded-lg transition-colors duration-200">Clear History</button>
         </div>
         <div id="doctor-history-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -365,7 +365,7 @@
         <p class="text-sm text-slate-500 mt-1 mb-6">Model your expected yield and savings across crops, then export a polished PDF report.</p>
 
         <button id="use-active-garden" type="button" class="text-sm font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-4 py-2 rounded-lg mb-4 inline-flex items-center gap-1.5 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0">
-          <span aria-hidden="true">↻</span> Use My Active Garden
+          <span aria-hidden="true">â†»</span> Use My Active Garden
         </button>
 
         <div id="basket-rows" class="space-y-4 mb-4"></div>
@@ -481,7 +481,7 @@
       const sqft = sqm * 10.7639;
       const resultEl = document.getElementById('space-dims-result');
       if (len > 0 && wid > 0) {
-        resultEl.innerHTML = `<span class="font-medium">Converted: ${sqm.toFixed(2)} m²</span> <span class="text-gray-400">(${sqft.toFixed(1)} sq ft)</span>`;
+        resultEl.innerHTML = `<span class="font-medium">Converted: ${sqm.toFixed(2)} mÂ²</span> <span class="text-gray-400">(${sqft.toFixed(1)} sq ft)</span>`;
         spaceSqInput.value = sqm.toFixed(2);
       } else {
         resultEl.textContent = '';
@@ -633,7 +633,7 @@
               <span class="inline-block text-[10px] px-1.5 py-0.5 rounded bg-white border border-gray-200 text-gray-600">
                 Severity: ${item.severity}
               </span>
-              <span class="text-[10px] text-green-700 font-semibold underline">View Report ↗</span>
+              <span class="text-[10px] text-green-700 font-semibold underline">View Report â†—</span>
             </div>
           </div>
         </div>
@@ -644,10 +644,10 @@
     // Weather emoji helper
     function weatherEmoji(minC, maxC) {
       const avg = (minC + maxC) / 2;
-      if (avg > 30) return '☀️';
-      if (avg > 25) return '⛅';
-      if (avg > 20) return '🌤️';
-      return '🌧️';
+      if (avg > 30) return 'â˜€ï¸';
+      if (avg > 25) return 'â›…';
+      if (avg > 20) return 'ðŸŒ¤ï¸';
+      return 'ðŸŒ§ï¸';
     }
 
     function weatherLabel(minC, maxC) {
@@ -668,7 +668,7 @@
         crops.forEach(c => {
           doctorSelect.add(new Option(c.name, c.name));
         });
-        // Basket rows may already exist (added before crops finished loading) —
+        // Basket rows may already exist (added before crops finished loading) â€”
         // backfill their crop dropdowns now that we have the list.
         document.querySelectorAll('.basket-crop').forEach(sel => populateBasketCropSelect(sel));
       } catch (err) {
@@ -687,7 +687,7 @@
             <td class="px-4 py-3 text-slate-700">${p.wholesale_price_per_kg.toFixed(2)}</td>
             <td class="px-4 py-3">${p.margin_percent ? `<span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2 py-1 rounded-lg">${p.margin_percent.toFixed(1)}%</span>` : '-'}</td>
             <td class="px-4 py-3">
-              <button type="button" class="lookup-price-btn text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-2.5 py-1.5 rounded-lg transition-colors duration-200" data-crop="${p.crop_name}">🔍 Look up</button>
+              <button type="button" class="lookup-price-btn text-xs font-semibold text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-not-allowed" data-crop="${p.crop_name}" disabled title="Live price lookup is temporarily unavailable">Look up (unavailable)</button>
               <div class="lookup-result text-xs mt-1.5 text-slate-600"></div>
             </td>
           </tr>
@@ -701,11 +701,12 @@
     // Live price lookup: read-only search, human reviews, then "Apply" saves
     // it via PATCH /api/market/prices/{crop}. Once applied, loadMarketPrices()
     // refreshes `marketPrices`, so the basket totals and PDF export (which
-    // both read from that same array) automatically use the new price —
+    // both read from that same array) automatically use the new price â€”
     // nothing else needs to change for that to take effect.
     // ---------------------------------------------------------------------
     async function runPriceLookup(cropName, resultEl) {
-      resultEl.textContent = 'Searching…';
+      resultEl.textContent = 'Live price lookup is temporarily unavailable.';
+      return;
       try {
         const res = await apiFetch(`/api/market/prices/lookup?crop_name=${encodeURIComponent(cropName)}`);
         const data = await res.json();
@@ -725,7 +726,7 @@
     }
 
     async function applyLookedUpPrice(cropName, price, resultEl) {
-      resultEl.textContent = 'Applying…';
+      resultEl.textContent = 'Applyingâ€¦';
       try {
         await apiFetch(`/api/market/prices/${encodeURIComponent(cropName)}`, {
           method: 'PATCH',
@@ -851,9 +852,9 @@
       const rhColor = rh > 80 ? 'bg-teal-500' : rh >= 60 ? 'bg-green-500' : 'bg-amber-500';
       const rhLabel = rh > 80 ? 'Fungus risk' : rh >= 60 ? 'Optimal' : 'Dry stress';
       const rainLower = (week.rainfall_pattern || '').toLowerCase();
-      const condEmoji = rainLower.includes('dry') || rainLower.includes('sunny') ? '☀️' :
-                        rainLower.includes('monsoon') || rainLower.includes('heavy') ? '🌧️' : '⛅';
-      const condRisk = rh > 80 ? ' · High Fungus Risk' : rainLower.includes('dry') ? ' · High Evaporation' : '';
+      const condEmoji = rainLower.includes('dry') || rainLower.includes('sunny') ? 'â˜€ï¸' :
+                        rainLower.includes('monsoon') || rainLower.includes('heavy') ? 'ðŸŒ§ï¸' : 'â›…';
+      const condRisk = rh > 80 ? ' Â· High Fungus Risk' : rainLower.includes('dry') ? ' Â· High Evaporation' : '';
       const tip = week.action_tip || 'Monitor plant health and adjust care as needed.';
       const detailClass = showDetails ? '' : 'hidden';
       const precipStr = week.precipitation_mm != null ? `${week.precipitation_mm.toFixed(1)}mm` : '-';
@@ -867,20 +868,20 @@
             </div>
             <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${phaseColor} mb-2">${week.phase_emoji} ${week.phase}</span>
             <div class="bg-green-50 border border-green-200 rounded-md p-2 mb-2">
-              <div class="text-xs text-green-900 leading-relaxed">💡 ${tip}</div>
+              <div class="text-xs text-green-900 leading-relaxed">ðŸ’¡ ${tip}</div>
             </div>
             <div class="text-xs text-gray-600">${condEmoji} ${week.rainfall_pattern}${condRisk}</div>
           </div>
           <div class="climate-detail ${detailClass} border-t border-gray-100 bg-gray-50 px-4 py-2 space-y-1 text-xs text-gray-600">
-            <div>🌡️ Temp: ${week.avg_temp_range}</div>
+            <div>ðŸŒ¡ï¸ Temp: ${week.avg_temp_range}</div>
             <div class="flex items-center gap-2">
-              <span>💧 Humidity: ${rh}%</span>
+              <span>ðŸ’§ Humidity: ${rh}%</span>
               <div class="flex-1 bg-gray-200 rounded-full h-1.5">
                 <div class="${rhColor} h-1.5 rounded-full" style="width: ${rh}%"></div>
               </div>
               <span class="text-gray-400 text-[10px]">${rhLabel}</span>
             </div>
-            <div class="flex justify-between"><span>☀️ Daylight: ${week.daylight_avg}</span><span>🌧 ${precipStr}</span></div>
+            <div class="flex justify-between"><span>â˜€ï¸ Daylight: ${week.daylight_avg}</span><span>ðŸŒ§ ${precipStr}</span></div>
           </div>
         </div>
       `;
@@ -889,7 +890,7 @@
     // Climate details toggle handler
     document.getElementById('climate-detail-toggle').addEventListener('click', function() {
       showClimateDetails = !showClimateDetails;
-      this.textContent = showClimateDetails ? '⚙️ Hide Climate Details' : '⚙️ Show Climate Details';
+      this.textContent = showClimateDetails ? 'âš™ï¸ Hide Climate Details' : 'âš™ï¸ Show Climate Details';
       this.classList.toggle('bg-green-100', showClimateDetails);
       this.classList.toggle('text-green-700', showClimateDetails);
       document.querySelectorAll('.climate-detail').forEach(el => {
@@ -939,10 +940,10 @@
         document.getElementById('planner-summary').innerHTML = `
           <div><span class="text-gray-500">Location</span><br>Lat ${loc.lat || '-'}, Lon ${loc.lon || '-'}</div>
           <div><span class="text-gray-500">Container</span><br>${data.container_type || '-'}</div>
-          <div><span class="text-gray-500">Space</span><br>${data.space_sqm ? data.space_sqm.toFixed(2) : '-'} m²</div>
+          <div><span class="text-gray-500">Space</span><br>${data.space_sqm ? data.space_sqm.toFixed(2) : '-'} mÂ²</div>
           <div><span class="text-gray-500">Target month</span><br><span class="font-semibold text-green-800">${targetMonthName}</span></div>
-          <div><span class="text-gray-500">Avg min temp</span><br>${fs.avg_min_temp_c != null ? fs.avg_min_temp_c.toFixed(1) : '-'} °C</div>
-          <div><span class="text-gray-500">Avg max temp</span><br>${fs.avg_max_temp_c != null ? fs.avg_max_temp_c.toFixed(1) : '-'} °C</div>
+          <div><span class="text-gray-500">Avg min temp</span><br>${fs.avg_min_temp_c != null ? fs.avg_min_temp_c.toFixed(1) : '-'} Â°C</div>
+          <div><span class="text-gray-500">Avg max temp</span><br>${fs.avg_max_temp_c != null ? fs.avg_max_temp_c.toFixed(1) : '-'} Â°C</div>
           <div><span class="text-gray-500">Avg daylight</span><br>${fs.avg_daylight_hours != null ? fs.avg_daylight_hours.toFixed(1) : '-'} h/day</div>
         `;
 
@@ -985,7 +986,7 @@
         
         // Render 7-day daily cards
         if (dailyCards.length > 0) {
-          const histNote = !isCurrentMonth ? `<div class="col-span-full text-xs text-amber-600 italic mb-1">📊 Typical Seasonal Conditions (${monthName(data.target_month)} baseline)</div>` : '';
+          const histNote = !isCurrentMonth ? `<div class="col-span-full text-xs text-amber-600 italic mb-1">ðŸ“Š Typical Seasonal Conditions (${monthName(data.target_month)} baseline)</div>` : '';
           weatherStrip.innerHTML = histNote + dailyCards.map(day => {
             const minC = day.min_temp_c ?? 20;
             const maxC = day.max_temp_c ?? 30;
@@ -1003,11 +1004,11 @@
                 <div class="text-xs text-gray-500 mb-1">${dateStr}</div>
                 <div class="text-2xl mb-1">${emoji}</div>
                 <div class="text-xs font-medium text-gray-700">${label}</div>
-                <div class="text-xs text-gray-500 mt-1">${minC.toFixed(0)}–${maxC.toFixed(0)}°C</div>
+                <div class="text-xs text-gray-500 mt-1">${minC.toFixed(0)}â€“${maxC.toFixed(0)}Â°C</div>
                 <div class="w-full h-1 ${bandColor} rounded-full mt-2"></div>
                 <div class="flex justify-between text-[10px] text-gray-400 mt-1">
-                  <span>☀ ${daylight}</span>
-                  <span>🌧 ${precip}</span>
+                  <span>â˜€ ${daylight}</span>
+                  <span>ðŸŒ§ ${precip}</span>
                 </div>
               </div>
             `;
@@ -1016,7 +1017,7 @@
         
         // Render dynamic crop growth timeline
         if (cropTimeline && cropTimeline.weeks && cropTimeline.weeks.length > 0) {
-          panelHeading.innerHTML = `📅 Growth &amp; Climate Timeline: <span class="text-green-800">${cropTimeline.crop_name}</span> <span class="text-gray-500 font-normal">· Month of ${monthName(data.target_month)} · ~${cropTimeline.harvest_days} days to harvest</span>`;
+          panelHeading.innerHTML = `ðŸ“… Growth &amp; Climate Timeline: <span class="text-green-800">${cropTimeline.crop_name}</span> <span class="text-gray-500 font-normal">Â· Month of ${monthName(data.target_month)} Â· ~${cropTimeline.harvest_days} days to harvest</span>`;
           cycleStrip.innerHTML = cropTimeline.weeks.map(w => buildTimelineCard(w, showClimateDetails)).join('');
         }
         
@@ -1043,12 +1044,12 @@
           let rowClass = 'hover:bg-gray-50 cursor-pointer transition';
           
           if (rank === 1) {
-            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">🏆 #1 Best</span>';
+            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">ðŸ† #1 Best</span>';
             rowClass = 'bg-green-50 hover:bg-green-100 cursor-pointer transition';
           } else if (rank === 2) {
-            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700 border border-gray-300">🥈 #2</span>';
+            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700 border border-gray-300">ðŸ¥ˆ #2</span>';
           } else if (rank === 3) {
-            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 border border-orange-200">🥉 #3</span>';
+            rankBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 border border-orange-200">ðŸ¥‰ #3</span>';
           } else {
             rankBadge = `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">#${rank}</span>`;
           }
@@ -1056,7 +1057,7 @@
           return `
             <tr class="${rowClass}" data-crop-name="${crop.name || ''}" data-harvest-days="${harvestDays}" title="Click to view growth timeline">
               <td class="px-3 py-2">${rankBadge}</td>
-              <td class="px-3 py-2 font-medium">${crop.name || '-'} <span class="text-xs text-gray-400">→</span></td>
+              <td class="px-3 py-2 font-medium">${crop.name || '-'} <span class="text-xs text-gray-400">â†’</span></td>
               <td class="px-3 py-2">${r.suitability_score != null ? r.suitability_score : '-'}</td>
               <td class="px-3 py-2">${r.layout || '-'}</td>
               <td class="px-3 py-2">${r.notes || '-'}</td>
@@ -1067,7 +1068,7 @@
         // Populate focus crop dropdown with recommended crops + "Other"
         const focusSelect = document.getElementById('focus-crop-select');
         const focusBar = document.getElementById('focus-crop-bar');
-        focusSelect.innerHTML = '<option value="">— select a crop —</option>';
+        focusSelect.innerHTML = '<option value="">â€” select a crop â€”</option>';
         (data.recommendations || []).forEach((r, idx) => {
           const crop = r.crop || {};
           if (crop.name) {
@@ -1076,11 +1077,11 @@
           }
         });
         // Add separator and "Other / Custom Plant" option
-        focusSelect.add(new Option('─────────────', ''));
+        focusSelect.add(new Option('â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€', ''));
         focusSelect.add(new Option('Other / Custom Plant...', '__custom__'));
         focusBar.classList.remove('hidden');
 
-        // Click handler for table rows → select in dropdown + fetch timeline
+        // Click handler for table rows â†’ select in dropdown + fetch timeline
         tbody.querySelectorAll('tr[data-crop-name]').forEach(row => {
           row.addEventListener('click', () => {
             const name = row.dataset.cropName;
@@ -1103,7 +1104,7 @@
       }
     });
 
-    // Target month change listener — re-fetch plan when month changes
+    // Target month change listener â€” re-fetch plan when month changes
     document.getElementById('target_month').addEventListener('change', () => {
       const resultDiv = document.getElementById('planner-result');
       if (!resultDiv.classList.contains('hidden')) {
@@ -1249,7 +1250,7 @@
         if (matchStatus === 'confirmed') {
           bannerDiv.innerHTML = `
             <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
-              <span class="text-green-600 text-xl mr-3">✓</span>
+              <span class="text-green-600 text-xl mr-3">âœ“</span>
               <span class="text-green-800 text-sm">${matchMessage}</span>
             </div>
           `;
@@ -1257,7 +1258,7 @@
         } else if (matchStatus === 'mismatch') {
           bannerDiv.innerHTML = `
             <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center">
-              <span class="text-amber-600 text-xl mr-3">⚠️</span>
+              <span class="text-amber-600 text-xl mr-3">âš ï¸</span>
               <span class="text-amber-800 text-sm">${matchMessage}</span>
             </div>
           `;
@@ -1340,15 +1341,15 @@
 
     document.getElementById('add-basket-row').addEventListener('click', addBasketRow);
 
-    // "Use My Active Garden" — pulls the signed-in grower's own active plants
+    // "Use My Active Garden" â€” pulls the signed-in grower's own active plants
     // from GET /api/garden/dashboard and replaces the basket with exact counts
     // (grouped by crop_name). Deliberately uses its own fetch (not the shared
-    // apiFetch) so this is the only call that sends an Authorization header —
+    // apiFetch) so this is the only call that sends an Authorization header â€”
     // every other tab's requests are untouched.
     async function useMyActiveGarden() {
       const btn = document.getElementById('use-active-garden');
       const originalText = btn.innerHTML;
-      btn.innerHTML = '<span class="animate-spin inline-block mr-1">↻</span> Syncing...';
+      btn.innerHTML = '<span class="animate-spin inline-block mr-1">â†»</span> Syncing...';
       btn.disabled = true;
 
       try {
@@ -1433,7 +1434,7 @@
         if (unmatched.length) notes.push(`skipped: ${unmatched.join(', ')}`);
         if (clamped) notes.push('counts capped at 200 pots max');
         
-        showStatus(notes.length ? `Synced garden — ${notes.join('; ')}.` : 'Synced with your active garden.', notes.length > 0 && unmatched.length > 0);
+        showStatus(notes.length ? `Synced garden â€” ${notes.join('; ')}.` : 'Synced with your active garden.', notes.length > 0 && unmatched.length > 0);
         
       } catch (err) {
         showStatus('Error syncing active garden: ' + err.message, true);
@@ -1471,7 +1472,7 @@
         const savings = totalYieldKg * retailPrice;
 
         grandTotalSavings += savings;
-        rowSummaryEl.textContent = `${totalYieldKg.toFixed(2)} kg → ${currency} ${savings.toFixed(2)}`;
+        rowSummaryEl.textContent = `${totalYieldKg.toFixed(2)} kg â†’ ${currency} ${savings.toFixed(2)}`;
 
         basketItems.push({
           crop_name: crop.name,
@@ -1481,7 +1482,7 @@
           currency,
           estimated_savings: savings,
         });
-        lines.push(`<p>${crop.name}: ${potCount} pots × ${yieldPerPotG} g → ${totalYieldKg.toFixed(2)} kg → ${currency} ${savings.toFixed(2)}</p>`);
+        lines.push(`<p>${crop.name}: ${potCount} pots Ã— ${yieldPerPotG} g â†’ ${totalYieldKg.toFixed(2)} kg â†’ ${currency} ${savings.toFixed(2)}</p>`);
       });
 
       if (!basketItems.length) {
@@ -1551,7 +1552,7 @@
     });
 
     // ---------------------------------------------------------------------------
-    // Focus Crop Timeline — interactive selection + dynamic rendering
+    // Focus Crop Timeline â€” interactive selection + dynamic rendering
     // ---------------------------------------------------------------------------
     function renderCycleStrip(timeline) {
       const cycleStrip = document.getElementById('weather-cycle-strip');
@@ -1561,7 +1562,7 @@
         return;
       }
       const currentMonth = parseInt(document.getElementById('target_month').value, 10);
-      panelHeading.innerHTML = `📅 Growth &amp; Climate Timeline: <span class="text-green-800">${timeline.crop_name}</span> <span class="text-gray-500 font-normal">· Month of ${monthName(currentMonth)} · ~${timeline.harvest_days} days, ${timeline.total_weeks} weeks</span>`;
+      panelHeading.innerHTML = `ðŸ“… Growth &amp; Climate Timeline: <span class="text-green-800">${timeline.crop_name}</span> <span class="text-gray-500 font-normal">Â· Month of ${monthName(currentMonth)} Â· ~${timeline.harvest_days} days, ${timeline.total_weeks} weeks</span>`;
       cycleStrip.innerHTML = timeline.weeks.map(week => buildTimelineCard(week, showClimateDetails)).join('');
       // Switch to timeline view
       document.getElementById('weather-view-4week').click();
@@ -1661,14 +1662,14 @@
       const settingsBtn = document.getElementById('auth-settings-btn');
       const logoutBtn = document.getElementById('auth-logout-btn');
 
-      // No token → keep the "Sign In" button visible and stop here.
+      // No token â†’ keep the "Sign In" button visible and stop here.
       if (!getAuthToken()) {
         if (signInBtn) signInBtn.classList.remove('hidden');
         if (badge) badge.classList.add('hidden');
         return;
       }
 
-      // Token present → hide Sign In, show the badge, resolve the profile.
+      // Token present â†’ hide Sign In, show the badge, resolve the profile.
       if (signInBtn) signInBtn.classList.add('hidden');
       if (badge) { badge.classList.remove('hidden'); badge.classList.add('flex'); }
 
