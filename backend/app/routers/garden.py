@@ -182,6 +182,37 @@ async def get_dashboard(
         await _run_garden_monitor(trigger_type="MANUAL")
         db.expire_all()
 
+         # Send the requesting user a Telegram summary of their current alert count
+        scope_user_id = _resolve_scope_user_id(current_user, x_user_id)
+        if scope_user_id is not None:
+            from backend.app.services.garden_monitor import send_telegram_alert
+
+            alert_count = (
+                db.query(PlantAlert)
+                .join(TrackedPlant, PlantAlert.plant_id == TrackedPlant.id)
+                .filter(
+                    TrackedPlant.user_id == scope_user_id,
+                    TrackedPlant.active == True,  # noqa: E712
+                    PlantAlert.resolved == False,  # noqa: E712
+                )
+                .count()
+            )
+
+            target_chat = (
+                current_user.telegram_chat_id
+                if current_user and getattr(current_user, "telegram_chat_id", None)
+                else None
+            )
+            if target_chat:
+                summary_text = (
+                    f"🔄 <b>Garden Refreshed</b>\n\n"
+                    f"You have <b>{alert_count}</b> active alert(s) in your garden."
+                )
+                try:
+                    await send_telegram_alert(target_chat, summary_text)
+                except Exception as tg_err:
+                    logger.warning(f"Failed to send refresh summary to Telegram: {tg_err}")
+
 
     scope_user_id = _resolve_scope_user_id(current_user, x_user_id)
 
