@@ -549,7 +549,6 @@ async def evaluate_garden_state(db: Session, trigger_type: str = 'SCHEDULED') ->
                     PlantAlert.plant_id == plant.id,
                     PlantAlert.alert_type == "weather",
                     PlantAlert.triggered_on == today,
-                    PlantAlert.resolved == False,
                 )
                 .first()
             )
